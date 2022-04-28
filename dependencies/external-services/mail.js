@@ -62,4 +62,6 @@ const sendActivationEmail = async (to, url, txt) => {
   })
 }
 
-module.exports = sendActivationEmail
+module.exports = {
+  sendActivationEmail
+}
