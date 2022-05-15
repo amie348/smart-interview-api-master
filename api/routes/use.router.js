@@ -4,15 +4,18 @@ const userRouter = require(`express`).Router();
 const { validateInput } = require(`../middlewares/input-validation-middleware`);
 
 // importing required validation schemas
-const { registerUserSchema } = require(`../../dependencies/joi-validation-schemas/user.schemas`);
+const { registerUserSchema, activateUserSchema } = require(`../../dependencies/joi-validation-schemas/user.schemas`);
 
+const { ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY,PARAMS , QUERY, NONE }} = require(`../../dependencies/config`)
 
 // importing required controllers
-const { register } = require(`../controllers/user.controllers`);
+const { register, activate } = require(`../controllers/user.controllers`);
+
+const { decodeActivationToken } = require(`../middlewares/activate.middleware`);
 
 
-userRouter.post(`/register`, validateInput(registerUserSchema, `BODY`), register);
-
+userRouter.post(`/register`, validateInput(registerUserSchema, BODY), register);
+userRouter.post(`/activate/:activationToken`, validateInput(activateUserSchema, PARAMS), decodeActivationToken, activate)
 
 
 // exporting router as module

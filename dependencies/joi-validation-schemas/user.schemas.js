@@ -23,11 +23,19 @@ const registerUserSchema = Joi.object({
 
 })
 
+// account activation input validation schema 
+const activateUserSchema = Joi.object({
+
+  activationToken: Joi.string().required()
+
+})
+
 
 
 // exporting input validation schemas as module
 module.exports = {
 
-  registerUserSchema
+  registerUserSchema,
+  activateUserSchema
 
 }

@@ -12,14 +12,12 @@ const UserModel = require(`../../api/models/user.model`);
 // user in database and returns response to it's caller 
 const saveUser = async (userData) => {
 
+  console.log(userData)
+
     try {
     
     // creating object to store new User 
-    const newUser = new UserModel({
-
-      franchiseData
-    
-    });
+    const newUser = new UserModel(userData);
 
     
     // saving franchise in the database
@@ -58,5 +56,13 @@ const saveUser = async (userData) => {
     };
 
   }
+
+}
+
+
+
+module.exports = {
+
+  saveUser
 
 }
