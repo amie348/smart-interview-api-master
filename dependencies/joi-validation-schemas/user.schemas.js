@@ -30,12 +30,21 @@ const activateUserSchema = Joi.object({
 
 })
 
+// validation schema for user login
+const loginSchema= Joi.object({
+
+  email: Joi.string().email().required(),
+  password: passwordComplexity(complexityOptions).required()
+
+});
+
 
 
 // exporting input validation schemas as module
 module.exports = {
 
   registerUserSchema,
-  activateUserSchema
+  activateUserSchema,
+  loginSchema
 
 }

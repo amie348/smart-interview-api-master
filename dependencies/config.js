@@ -5,8 +5,10 @@ const { DB_USERNAME, DB_PASSWORD } = require('./credentials');
 // seeting allowed APP_MODES
 const ALLOWED_APP_MODES = ['DEV', 'PROD']
 
-const APP_MODE = process.env.APP_MODE && ALLOWED_APP_MODES.includes(process.env.APP_MODE) ? process.env.APP_MODE : 'PROD'
+const APP_MODE = process.env.APP_MODE && ALLOWED_APP_MODES.includes(process.env.APP_MODE) ? process.env.APP_MODE : 'PROD';
 
+
+console.log(`APP_MODE`, APP_MODE)
 
 
 // exporting condfg paramters as module
@@ -20,9 +22,9 @@ module.exports = {
 
   CLIENT_BASE_URL: APP_MODE === `DEV` ? `http://localhost:4000` : `http://localhost:4000`, 
 
-  // MONGODB_ATLAS_CONNECTION_URI : `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@smart-interview.k0rap.mongodb.net/smart-interview`,
+  MONGODB_ATLAS_CONNECTION_URI : `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@smart-interview.k0rap.mongodb.net/smart-interview`,
 
-  MONGODB_ATLAS_CONNECTION_URI: 'mongodb://127.0.0.1:27017/smart-interview',
+  // MONGODB_ATLAS_CONNECTION_URI: 'mongodb://127.0.0.1:27017/smart-interview',
 
   HTTP_STATUS_CODES: {
 

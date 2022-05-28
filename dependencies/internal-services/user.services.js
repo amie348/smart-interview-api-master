@@ -12,8 +12,6 @@ const UserModel = require(`../../api/models/user.model`);
 // user in database and returns response to it's caller 
 const saveUser = async (userData) => {
 
-  console.log(userData)
-
     try {
     
     // creating object to store new User 
@@ -61,8 +59,57 @@ const saveUser = async (userData) => {
 
 
 
+const getUser = async (userData) => {
+
+  try {
+
+    // querying database for user
+    const result = await UserModel.findOne({userData}).lean().exec();
+
+    if(!result){
+
+      return {
+
+        status: NOT_FOUND,
+        error: `User Not found in data`
+
+      }
+
+    }
+
+
+    // returning saved system permissions to its caller
+    return {
+
+      status: SUCCESS,
+      data: result
+
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // loggine error messages to the console
+    logError(`ERROR @ getUser -> user.services.js`, error);
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status: SERVER_ERROR,
+      error: `Unhandled exception occured on the server.`
+
+    };
+
+  }
+
+}
+
+
+
+
 module.exports = {
 
-  saveUser
+  saveUser,
+  getUser
 
 }

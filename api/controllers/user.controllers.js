@@ -12,7 +12,7 @@ const { createAccessToken, createRefreshToken, createActivationToken } = require
 // importing required mail helpers
 const { sendActivationEmail } = require("../../dependencies/external-services/mail");
 
-const { saveUser } = require(`../../dependencies/internal-services/user.services`)
+const { saveUser, getUser } = require(`../../dependencies/internal-services/user.services`)
 
 
 const register = async (req, res) => {
@@ -67,8 +67,6 @@ const activate = async (req,res) => {
 
     const { status, data, error } = await saveUser(req.tokenData);
 
-    const user = {_id : data._id, email: data.email, username: data.username, role: data.role}
-
     // checking the result of the operation
     if (status === SERVER_ERROR) {
       // this code runs in case data service failed due to
@@ -112,6 +110,10 @@ const activate = async (req,res) => {
 
     }
 
+    const user = {_id : data._id, email: data.email, username: data.username, role: data.role}
+
+    
+
     const token = await createAccessToken(user)
 
     // returning the response with success message
@@ -121,7 +123,7 @@ const activate = async (req,res) => {
       message: `SUCCESS: Requested operation successful.`,
       data: {
 
-        data : {...user},
+        user,
         token
 
       }
@@ -148,11 +150,111 @@ const activate = async (req,res) => {
   }
 }
 
+const login = async (req, res) => {
+
+  try{
+
+    const { email, password } = req.body;
+
+
+    const {status, data, error } = await getUser({email, password})
+
+
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === NOT_FOUND) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`User NOt found in database.`);
+
+      // returning the response with an error message
+      return res.status(NOT_FOUND).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+
+    const user = {_id : data._id, email: data.email, username: data.username, role: data.role}
+
+
+    const accessToken = createAccessToken(user);
+
+
+    logSuccess(`Requested Operation Completed. User Logged inn successfully`);
+
+
+    res.status(SUCCESS).json({
+
+      hasError: false,
+      message: `Logged In Successully`,
+      data: {
+    
+        user,
+        accessToken
+    
+      },
+
+    })
+
+
+  } catch(error) {
+
+    logError(`ERROR while loging user in`, error)
+
+    res.status(SERVER_ERROR).json({
+
+      hasError: true,
+        message: `error. requested operation failed`,
+        error: {
+
+          error: `An unhandled exception occured on the server.`
+
+        }
+
+    })
+
+  }
+
+}
+
+
 
 // exporting controllers as modules
 module.exports = {
 
   register,
-  activate
+  activate,
+  login
 
 }
