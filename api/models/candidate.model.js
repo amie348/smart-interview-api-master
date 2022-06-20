@@ -1,7 +1,7 @@
 const mongoose = require(`mongoose`);
 
 // importing required schemas
-const { addressSchema } = require(`./schemas/address.schema`)
+// const { addressSchema } = require(`./schemas/address.schema`)
 
 
 
@@ -9,17 +9,21 @@ const candiateSchema = new mongoose.Schema({
 
   _userId: {
       type: mongoose.Types.ObjectId,
-      ref: `user`
+      ref: `user`,
+      unique:   true
   },
   age:{
     type: Number,
     required: true
   },
-  address: addressSchema,
+  // address: addressSchema,
+  address : {
+    type: String,
+    trim: true
+  },
   skills:{
     type: [String],
     trim: true,
-    required: true
   },
   education: [{
     qualification: {
@@ -39,20 +43,16 @@ const candiateSchema = new mongoose.Schema({
 
     jobType:{
       type: String,
-      trim: true,
       default:``
     },
     joinDate:{
       type: Date,
-      required: true
     },
     endDate:{
       type: Date,
-      required: true
     },
     address: {
-      type: addressSchema,
-      default: {}
+      type: String,
     },
 
   }],
@@ -63,7 +63,6 @@ const candiateSchema = new mongoose.Schema({
   phoneNumber:{
     type: String,
     trim: true,
-    required: true
   },
   remoteWork:{
     type: Boolean,

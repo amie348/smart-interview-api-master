@@ -15,7 +15,7 @@ const createActivationToken = (data) => {
 // create access token
 const createAccessToken = (data) => {
 
-  return jwt.sign(data, ACCESS_TOKEN_SECRET_KEY, { expiresIn: `1d` })
+  return jwt.sign(data, ACCESS_TOKEN_SECRET_KEY, { expiresIn: `10d` })
 
 }
 

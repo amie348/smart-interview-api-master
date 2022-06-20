@@ -4,7 +4,7 @@ const bcrypt = require(`bcrypt`);
 const { logWarning, logError, logSuccess } = require(`../../dependencies/helpers/console.helpers`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../../dependencies/config`);
+const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../../dependencies/config`);
 
 // importing required jwt helpers 
 const { createAccessToken, createRefreshToken, createActivationToken } = require(`../../dependencies/helpers/jwt.helpers`);
@@ -12,7 +12,7 @@ const { createAccessToken, createRefreshToken, createActivationToken } = require
 // importing required mail helpers
 const { sendActivationEmail } = require("../../dependencies/external-services/mail");
 
-const { saveUser, getUser } = require(`../../dependencies/internal-services/user.services`)
+const { saveUser, getUser, addCandidateInfoInDatabase } = require(`../../dependencies/internal-services/user.services`)
 
 
 const register = async (req, res) => {
@@ -24,6 +24,7 @@ const register = async (req, res) => {
     // hashing password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    
     // creating activation code
     const activationToken = await createActivationToken({username, [`password`]: hashedPassword, role, email});
 
@@ -202,6 +203,26 @@ const login = async (req, res) => {
 
       });
 
+    }else if (status === UNAUTHORIZED) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(error);
+
+      // returning the response with an error message
+      return res.status(NOT_FOUND).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
     }
 
 
@@ -248,6 +269,74 @@ const login = async (req, res) => {
 
 }
 
+const addCandidateInfo = async (req, res) => {
+
+  try{
+
+    const  {status, data, error} = await addCandidateInfoInDatabase(req.body, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+  } catch(error){
+
+    logError(`ERROR @ addCandidateInfo`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
 
 
 // exporting controllers as modules
@@ -255,6 +344,7 @@ module.exports = {
 
   register,
   activate,
-  login
+  login,
+  addCandidateInfo
 
 }
