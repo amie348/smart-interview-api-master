@@ -118,18 +118,57 @@ const updateInterviewerSchema = Joi.object({
 
 })
 
+const companySchema = Joi.object({
+
+  companyName: Joi.string().required(),
+  ceoName: Joi.string().required(),
+  companyAddress: Joi.string().required(),
+  companyDescription: Joi.string().required(),
+  industry: Joi.string().required(),
+  ownershipType: Joi.string().required(),
+  employeesNo: Joi.number().required(),
+  origin: Joi.string().required(),
+  operatingSince: Joi.date().required(),
+  officesNo: Joi.number().required(),
+  contactEmail: Joi.string().email().required(),
+  contactNo: Joi.string().required(),
+
+})
+
+
+const updateCompnaySchema = Joi.object({
+
+  companyName: Joi.string(),
+  ceoName: Joi.string(),
+  companyAddress: Joi.string(),
+  companyDescription: Joi.string(),
+  industry: Joi.string(),
+  ownershipType: Joi.string(),
+  employeesNo: Joi.number(),
+  origin: Joi.string(),
+  operatingSince: Joi.date(),
+  officesNo: Joi.number(),
+  contactEmail: Joi.string().email(),
+  contactNo: Joi.string(),
+
+})
 
 // exporting input validation schemas as module
 module.exports = {
 
   loginSchema,
-  candidateSchema,
   registerUserSchema,
   activateUserSchema,
+  
+  candidateSchema,
   updateCandidateSchema,
   specificCandidateIdSchema,
+  
   interviewerSchema,
   updateInterviewerSchema,
-  interviewerIdSchema
+  interviewerIdSchema,
+
+  companySchema,
+  updateCompnaySchema
 
 }

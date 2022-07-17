@@ -13,16 +13,17 @@ const {
   specificCandidateIdSchema, 
   interviewerSchema, 
   updateInterviewerSchema,
-  interviewerIdSchema
+  interviewerIdSchema,
+  companySchema
 } = require(`../validators/user.schemas`);
 
 const { ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY,PARAMS , QUERY, NONE }} = require(`../config`)
 
 // importing required controllers
-const { register, activate, login, addCandidateInfo, updateCandidateInfoById, addInterviewerInfo, updateInterviewerInfoById } = require(`../controllers/user.controllers`);
+const { register, activate, login, addCandidateInfo, updateCandidateInfoById, addInterviewerInfo, updateInterviewerInfoById, addCompanyInfo, updateCompanyInfoById, updateCompnaySchema } = require(`../controllers/user.controllers`);
 
 
-const { decodeActivationToken, authenticateUser } = require(`../middlewares/authentication.middleware`);
+const { decodeActivationToken, authenticateUser, authorizeInterviewer } = require(`../middlewares/authentication.middleware`);
 
 
 userRouter.post(`/register`, validateInput(registerUserSchema, BODY), register);
@@ -39,8 +40,8 @@ userRouter.post(`/interviewer`, authenticateUser , validateInput(interviewerSche
 userRouter.patch(`/interviewer/:_interviewerId`, authenticateUser, validateInput(interviewerIdSchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateInterviewerInfoById);
 
 
-userRouter.post(`/company`, authenticateUser , validateInput(interviewerSchema, BODY), addInterviewerInfo)
-userRouter.patch(`/company/:_Id`, authenticateUser, validateInput(interviewerIdSchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateInterviewerInfoById);
+userRouter.post(`/company`, authenticateUser, authorizeInterviewer, validateInput(companySchema, BODY), addCompanyInfo)
+userRouter.patch(`/company/:_Id`, authenticateUser, authorizeInterviewer, validateInput(updateCompnaySchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateCompanyInfoById);
 
 
 

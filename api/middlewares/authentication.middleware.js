@@ -8,7 +8,7 @@ const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers
 
 const { ACTIVATION_TOKEN_SECRET_KEY, ACCESS_TOKEN_SECRET_KEY, REFRESH_TOKEN_SECRET_KEY } = require(`../credentials`)
 
-const { findUser, findCandidate } = require(`../services/user.services`);
+const { findUser, findCandidate, findInterviewer } = require(`../services/user.services`);
 
 
 const decodeActivationToken = async(req,res, next) => {
@@ -83,7 +83,7 @@ const authenticateUser = async(req,res, next) => {
 
     if(!tokenData) {
 
-      logError(`ERROR while activating user`);
+      logError(`ERROR while authenticating user`);
 
       return res.status(BAD_REQUEST).json({
   
@@ -91,7 +91,7 @@ const authenticateUser = async(req,res, next) => {
         message: `error. requested operation failed`,
         error: {
   
-          error: `Invalid Activation Token`
+          error: `Invalid Access Token`
   
         }
   
@@ -139,11 +139,57 @@ const authenticateUser = async(req,res, next) => {
 
 }
 
+const authorizeInterviewer = async (req, res, next) => {
+
+try{
+
+
+    const {status, data, error} = await findInterviewer(req.user);
+
+    if(status === NOT_FOUND){
+
+      logError(`ERROR: interviewer not found in database while authorizing`)
+
+      return res.status(NOT_FOUND).json({
+
+        hasError: true,
+        messatge: error
+
+      })
+
+    }
+
+    req.user._interviewerId = data._id;
+
+    next()
+
+  }
+  catch(error){
+
+    logError(`ERROR while authorizing  interviewer`, error);
+
+    res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: `error. requested operation failed`,
+      error: {
+
+        error: `An unhandled exception occured on the server.`
+
+      }
+
+    })
+
+  }
+
+} 
+
 
 
 module.exports = {
 
   decodeActivationToken,
-  authenticateUser
+  authenticateUser,
+  authorizeInterviewer
 
 }

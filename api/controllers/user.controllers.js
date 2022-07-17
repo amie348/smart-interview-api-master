@@ -12,7 +12,7 @@ const { createAccessToken, createRefreshToken, createActivationToken } = require
 // importing required mail helpers
 const { sendActivationEmail } = require("../services/mail");
 
-const { saveUser, getUser, addCandidateInfoInDatabase, updateCandidateInfoInDatabase, addInterviewerInfoInDatabase, updateInterviewerInfoInDatabase } = require(`../services/user.services`)
+const { saveUser, getUser, addCandidateInfoInDatabase, updateCandidateInfoInDatabase, addInterviewerInfoInDatabase, updateInterviewerInfoInDatabase, addCompanyInfoInDatabase, updateCompanyInfoInDatabase } = require(`../services/user.services`)
 
 
 const register = async (req, res) => {
@@ -469,6 +469,16 @@ const addInterviewerInfo = async (req, res) => {
 
     }
 
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "INterviewer Information Added Successfully",
+      data: {
+        data
+      }
+
+    })
+
   } catch(error){
 
     logError(`ERROR @ addCandidateInfo`, error)
@@ -571,8 +581,166 @@ const updateInterviewerInfoById = async (req, res) => {
 
 }
 
+const addCompanyInfo = async (req, res) => {
 
+  try{
 
+    const  {status, data, error} = await addCompanyInfoInDatabase(req.body, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Company Information Added Successfully",
+      data: {
+        data
+      }
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ addCandidateInfo`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
+
+const updateCompanyInfoById = async (req, res) => {
+
+  try{
+
+    const { _companyId } = req.params;
+
+    const  {status, data, error} = await updateCompanyInfoInDatabase(req.body, _companyId, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Company Information Updated Successfully",
+      data: {
+        data
+      }
+
+    })
+  
+  
+  } catch(error){
+
+    logError(`ERROR @ updateCompanyInfoById`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
 
 // exporting controllers as modules
 module.exports = {
@@ -580,9 +748,14 @@ module.exports = {
   login,
   activate,
   register,
+  
   addCandidateInfo,
   updateCandidateInfoById,
+  
   addInterviewerInfo,
-  updateInterviewerInfoById
+  updateInterviewerInfoById,
+  
+  addCompanyInfo,
+  updateCompanyInfoById
 
 }

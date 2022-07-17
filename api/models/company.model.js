@@ -8,41 +8,32 @@ const companySchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId, 
     ref: 'Interviewer' 
   },
-  company_name: {
+  companyName: {
     type: String,
-    default: ``
   },
   ceoName: {
     type: String,
-    default: ``
   },  
   companyAddress: {
     type: String,
-    default: ``
   },
   companyDescription:{
     type: String,
-    defualt: ``
   },
   industry: {
     type: String,
-    default: ``
   },
   ownershipType : {
     type: String,
-    defualt: `` //public/ private/ sole partnership/ government/ ngo
   },
   employeesNo: {
-    type: String,
-    default: ``
+    type: Number,
   },
   origin:{
     type: String,
-    default:``
   },
   operatingSince :{
-    type: String,
-    default: ``
+    type: Date,
   },
   officesNo: {
     type: Number,
@@ -50,11 +41,9 @@ const companySchema = new mongoose.Schema({
   },
   contactEmail: {
     type: String,
-    default: ``,
   },
   contactNo: {
     type: String,
-    default: ``
   },
 }, {
   timestamps: true

@@ -4,10 +4,10 @@ const mongoose = require('mongoose')
 
 const interviewerSchema = new mongoose.Schema({
 
-    _userId: { type: mongoose.Schema.ObjectId, ref: 'user' },
+    _userId: { type: mongoose.Schema.ObjectId, ref: 'user', unique: true },
     // posts: [{type: mongoose.Schema.ObjectId, ref: `Post`}],
     
-    companies: [{type: mongoose.Schema.ObjectId, ref: `company`}],
+    company: {type: mongoose.Schema.ObjectId, ref: `company`},
     
     age: {
       type : Number,
