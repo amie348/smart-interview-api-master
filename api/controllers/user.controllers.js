@@ -1,18 +1,18 @@
 const bcrypt = require(`bcrypt`);
 
 // importing required packages and modules
-const { logWarning, logError, logSuccess } = require(`../../dependencies/helpers/console.helpers`);
+const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../../dependencies/config`);
+const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../config`);
 
 // importing required jwt helpers 
-const { createAccessToken, createRefreshToken, createActivationToken } = require(`../../dependencies/helpers/jwt.helpers`);
+const { createAccessToken, createRefreshToken, createActivationToken } = require(`../helpers/jwt.helpers`);
 
 // importing required mail helpers
-const { sendActivationEmail } = require("../../dependencies/external-services/mail");
+const { sendActivationEmail } = require("../services/mail");
 
-const { saveUser, getUser, addCandidateInfoInDatabase } = require(`../../dependencies/internal-services/user.services`)
+const { saveUser, getUser, addCandidateInfoInDatabase, updateCandidateInfoInDatabase, addInterviewerInfoInDatabase, updateInterviewerInfoInDatabase } = require(`../services/user.services`)
 
 
 const register = async (req, res) => {
@@ -338,13 +338,251 @@ const addCandidateInfo = async (req, res) => {
 
 }
 
+const updateCandidateInfoById = async (req, res) => {
+
+  try{
+
+    const { _candidateId } = req.params;
+
+    const  {status, data, error} = await updateCandidateInfoInDatabase(req.body, _candidateId, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Candidate Information Added Successfully",
+      data: {
+        data
+      }
+
+    })
+  
+  
+  } catch(error){
+
+    logError(`ERROR @ addCandidateInfo`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
+
+const addInterviewerInfo = async (req, res) => {
+
+  try{
+
+    const  {status, data, error} = await addInterviewerInfoInDatabase(req.body, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+  } catch(error){
+
+    logError(`ERROR @ addCandidateInfo`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
+
+const updateInterviewerInfoById = async (req, res) => {
+
+  try{
+
+    const { _interviewerId } = req.params;
+
+    const  {status, data, error} = await updateInterviewerInfoInDatabase(req.body, _interviewerId, req.user);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    } else if (status === CONFLICT) {
+      // this code runs in case data service failed due to
+      // duplication value
+
+      // logging error message to the console
+      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+
+      // returning the response with an error message
+      return res.status(CONFLICT).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Interviewer Information Updated Successfully",
+      data: {
+        data
+      }
+
+    })
+  
+  
+  } catch(error){
+
+    logError(`ERROR @ addCandidateInfo`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+
+}
+
+
+
 
 // exporting controllers as modules
 module.exports = {
 
-  register,
-  activate,
   login,
-  addCandidateInfo
+  activate,
+  register,
+  addCandidateInfo,
+  updateCandidateInfoById,
+  addInterviewerInfo,
+  updateInterviewerInfoById
 
 }

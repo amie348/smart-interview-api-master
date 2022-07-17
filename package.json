@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "nodemon server.js",
-    "start:dev": "cross-env APP_MODE=DEV nodemon server.js",
+    "dev": "cross-env APP_MODE=DEV nodemon server.js",
     "start": "cross-env APP_MODE=PROD node server.js"
   },
   "repository": {

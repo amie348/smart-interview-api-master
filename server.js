@@ -2,13 +2,13 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const { logSuccess, logInfo, logWarning, logError } = require(`./dependencies/helpers/console.helpers`);
+const { logSuccess, logInfo, logWarning, logError } = require(`./api/helpers/console.helpers`);
 
 // impirtng database functions
-const { connecDatabase } = require('./dependencies/helpers/database.helper');
+const { connecDatabase } = require('./api/helpers/database.helper');
 
 // importing required config params
-const { APP_MODE, NODE_PORT } = require(`./dependencies/config`);
+const { APP_MODE, NODE_PORT } = require(`./api/config`);
 
 // importing required routers
 const { userRouter } = require(`./api/routes/use.router`);

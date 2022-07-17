@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 
 const interviewerSchema = new mongoose.Schema({
 
-    user: { type: mongoose.Schema.ObjectId, ref: 'user' },
+    _userId: { type: mongoose.Schema.ObjectId, ref: 'user' },
     // posts: [{type: mongoose.Schema.ObjectId, ref: `Post`}],
     
     companies: [{type: mongoose.Schema.ObjectId, ref: `company`}],
@@ -18,30 +18,33 @@ const interviewerSchema = new mongoose.Schema({
       type : String,
       default: `` 
     },
-    phone_number: {
+
+    phoneNumber: {
       type : String,
       default: `` 
     },
 
-    postal_address: {
+    address: {
       type : String,
       default: `` 
     },
 
 
     education: {
+        
         qualification: {
             type: String,
             default: ``
         },
-        institute_name: {
+        instituteName: {
             type: String,
             default: ``
         },
-        completion_year: {
+        completionYear: {
             type: String,
             default: ``
         }
+
     },
 }, {
     timestamps: true

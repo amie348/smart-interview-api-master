@@ -1,7 +1,7 @@
 const Joi = require(`joi`);
 const passwordComplexity = require('joi-password-complexity')
 const {ALLOWED_USER_ROLES} = require(`../config`);
-const { validatePhoneNo } = require(`../helpers/joi.helpers`)
+const { validatePhoneNo, objectIdValidation } = require(`../helpers/joi.helpers`)
 
 
 const complexityOptions = {
@@ -73,14 +73,63 @@ const candidateSchema = Joi.object({
 
 })
 
+const updateCandidateSchema = Joi.object({
+
+  age: Joi.number(),
+  address: Joi.string(),
+  skills: Joi.array().items(Joi.string()),
+  education: Joi.array().items(educationSchema),
+  workExperience: Joi.array().items(workExperienceSchema),
+  desiredJobTitles: Joi.array().items(Joi.string().required()),
+  phoneNumber: Joi.string(),//.custom(validatePhoneNo, `Validating Phone Number`),
+  remoteWork: Joi.bool()
+
+})
+
+const specificCandidateIdSchema = Joi.object({
+
+  _candidateId: Joi.string().custom(objectIdValidation, `Validating Specific Candidate`).required()
+
+})
+
+const interviewerIdSchema = Joi.object({
+
+  _interviewerId: Joi.string().custom(objectIdValidation, `Validating Specific Interviewer`).required()
+
+})
+
+const interviewerSchema = Joi.object({
+
+  age: Joi.number().required(),
+  address: Joi.string().required(),
+  city: Joi.string().required(),
+  education: educationSchema.required(),
+  phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
+
+})
+
+const updateInterviewerSchema = Joi.object({
+
+  age: Joi.number(),
+  address: Joi.string(),
+  city: Joi.string(),
+  education: educationSchema,
+  phoneNumber: Joi.string(),//.custom(validatePhoneNo, `Validating Phone Number`),
+
+})
 
 
 // exporting input validation schemas as module
 module.exports = {
 
+  loginSchema,
+  candidateSchema,
   registerUserSchema,
   activateUserSchema,
-  loginSchema,
-  candidateSchema
+  updateCandidateSchema,
+  specificCandidateIdSchema,
+  interviewerSchema,
+  updateInterviewerSchema,
+  interviewerIdSchema
 
 }

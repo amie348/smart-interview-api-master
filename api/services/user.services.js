@@ -1,8 +1,9 @@
 // importing required packages and modules
 const { logWarning, logError, logInfo } = require(`../helpers/console.helpers`);
 
-const UserModel = require(`../../api/models/user.model`);
-const candidateModel = require(`../../api/models/candidate.model`);
+const UserModel = require(`../models/user.model`);
+const candidateModel = require(`../models/candidate.model`);
+const interviewerModel = require(`../models/interviewer.model`)
 const bcrypt = require(`bcrypt`);
 
 
@@ -211,12 +212,210 @@ const addCandidateInfoInDatabase =  async (candidateData, user) => {
 
 }
 
+const updateCandidateInfoInDatabase =  async (candidateData, _candidateId, user) => {
+
+  try {
+   
+    
+      logInfo(`Info .. Updating Candidate Information `)
+      
+      // saving franchise in the database
+      const result = await candidateModel.findOneAndUpdate({_id: _candidateId, _userId: user._id}, candidateData, {new: true});
+      
+      if(!result){
+      
+          // returning saved response to it's caller 
+          return{
+      
+            status: NOT_FOUND,
+            error: "candidate Not found"
+        
+        };
+
+      }
+
+      console.log("success")
+  
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: SUCCESS,
+          data: result
+      
+      };
+  
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // setting value of status and description
+    const [status, err] = [SERVER_ERROR,`Updating Candidate Information failed.`];
+      
+    logError(`ERROR @ updateCandidateInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
+
+const findCandidate = async (_candidateId) => {
+
+  try{
+
+    const candidate = await candidateModel.findOne({_id: _candidateId}).lean().exec();
+
+
+    if(!candidate){
+
+      return {
+      
+        status: NOT_FOUND,
+        error: "candidate dose not exist in database."
+      
+      }
+
+    }
+
+    
+    return {
+      status: SUCCESS,
+      data: user
+    }
+
+  } catch(error) {
+
+
+    logError(`ERROR @ error while finding user`, error);
+
+    throw(error)
+
+  }
+
+}
+
+const addInterviewerInfoInDatabase =  async (interviewerData, user) => {
+
+  try {
+  
+      // creating object to store new User 
+      const newInterviewer = new interviewerModel({
+          _userId: user._id,
+          ...interviewerData
+      });
+  
+      logInfo(`Info .. Adding Interviewer Information `)
+      
+      // saving franchise in the database
+      const result = await newInterviewer.save();
+  
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: CREATED,
+          data: result
+      
+      };
+  
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // logging error messages to the console
+      
+    // checking if the error stems from duplicate value in database
+    const isDuplicateError = error && error.code === 11000;
+
+    // fetching fields which caused duplication error
+    const duplicateErrorFields = (Object.keys(error.keyValue)).join(`, `);
+
+    // setting value of status and description
+    const [status, err] = [isDuplicateError ? CONFLICT : SERVER_ERROR, isDuplicateError ? `Adding interviewer information failed due to duplicate ${duplicateErrorFields}.` : `Adding INterviewer Information failed.`];
+      
+    logError(`ERROR @ addInterviewerInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
+
+const updateInterviewerInfoInDatabase =  async (interviewerData, _interviewerId, user) => {
+
+  try {
+   
+    
+      logInfo(`Info .. Updating Interviewer Information `)
+      
+      const result = await interviewerModel.findOneAndUpdate({_id: _interviewerId, _userId: user._id}, interviewerData, {new: true});
+      
+      if(!result){
+      
+          // returning saved response to it's caller 
+          return{
+      
+            status: NOT_FOUND,
+            error: "interview Not found"
+        
+        };
+
+      }
+
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: SUCCESS,
+          data: result
+      
+      };
+
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // setting value of status and description
+    const [status, err] = [SERVER_ERROR,`Updating Interviewer Information failed.`];
+      
+    logError(`ERROR @ updateInterviewerInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
 
 module.exports = {
 
-  saveUser,
-  findUser,
   getUser,
-  addCandidateInfoInDatabase
+  findUser,
+  saveUser,
+
+  findCandidate,
+  addCandidateInfoInDatabase,
+  updateCandidateInfoInDatabase,
+  
+  addInterviewerInfoInDatabase,
+  updateInterviewerInfoInDatabase
 
 }

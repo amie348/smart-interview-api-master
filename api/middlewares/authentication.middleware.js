@@ -1,14 +1,14 @@
 const jwt = require(`jsonwebtoken`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { BAD_REQUEST, SERVER_ERROR, NOT_FOUND, UNAUTHORIZED } } = require(`../../dependencies/config`);
+const { HTTP_STATUS_CODES: { BAD_REQUEST, SERVER_ERROR, NOT_FOUND, UNAUTHORIZED } } = require(`../config`);
 
 // importing required packages and modules
-const { logWarning, logError, logSuccess } = require(`../../dependencies/helpers/console.helpers`);
+const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
 
-const { ACTIVATION_TOKEN_SECRET_KEY, ACCESS_TOKEN_SECRET_KEY, REFRESH_TOKEN_SECRET_KEY } = require(`../../dependencies/credentials`)
+const { ACTIVATION_TOKEN_SECRET_KEY, ACCESS_TOKEN_SECRET_KEY, REFRESH_TOKEN_SECRET_KEY } = require(`../credentials`)
 
-const { findUser } = require(`../../dependencies/internal-services/user.services`);
+const { findUser, findCandidate } = require(`../services/user.services`);
 
 
 const decodeActivationToken = async(req,res, next) => {

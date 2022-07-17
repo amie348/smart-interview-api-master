@@ -1,8 +1,8 @@
 // importing required packages and modules
-const { logInfo, logError } = require(`../../dependencies/helpers/console.helpers`);
+const { logInfo, logError } = require(`../helpers/console.helpers`);
 
 // importing required config params
-const { HTTP_STATUS_CODES: { BAD_REQUEST }, ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY, PARAMS, QUERY, NONE } } = require(`../../dependencies/config`);
+const { HTTP_STATUS_CODES: { BAD_REQUEST }, ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY, PARAMS, QUERY, NONE } } = require(`../config`);
 
 
 

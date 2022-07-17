@@ -26,6 +26,8 @@ const candiateSchema = new mongoose.Schema({
     trim: true,
   },
   education: [{
+    _id: false,
+
     qualification: {
         type : String,
         default: ``
@@ -40,6 +42,8 @@ const candiateSchema = new mongoose.Schema({
     }
   }],
   workExperience:[{
+
+    _id: false,
 
     jobType:{
       type: String,
