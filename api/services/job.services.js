@@ -153,8 +153,9 @@ const getJobsFromDatabase = async (body,user) => {
 const updateJobInDatabase = async (updateQuery, _jobId) => {
 
   try {
+
     
-    const job = await JobModel.findOneAndUpdate({_id: _jobId}, updateQuery);
+    const job = await JobModel.findOneAndUpdate({_id: _jobId}, updateQuery,{new: true});
 
     if(!job){
 
@@ -239,6 +240,79 @@ const deletJobFromDatabase = async (_jobId, user) => {
 
 }
 
+const getApplicantsFromDataBAse = async (_jobId, user) => {
+
+  try {
+
+    
+    const pipeline = [
+      {
+        '$match': {
+          '_id': mongoose.Types.ObjectId(_jobId)
+        }
+      }, {
+        '$project': {
+          '_id': 1, 
+          'appliedBy': 1, 
+          'title': 1
+        }
+      }, {
+        '$lookup': {
+          'from': 'candidates', 
+          'let': {
+            'applicants': '$appliedBy'
+          }, 
+          'pipeline': [
+            {
+              '$match': {
+                '$expr': {
+                  '$in': [
+                    '$_id', '$$applicants'
+                  ]
+                }
+              }
+            }, {
+              '$project': {
+                '_id': 1, 
+                'phoneNumber': 1, 
+                'address': 1
+              }
+            }
+          ], 
+          'as': 'applicants'
+        }
+      }
+    ]
+
+    const applicants = (await JobModel.aggregate(pipeline).exec())[0];
+
+
+    // returning saved system permissions to its caller
+    return {
+
+      status: SUCCESS,
+      data: applicants
+
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // loggine error messages to the console
+    logError(`ERROR @ getUser -> user.services.js`, error);
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status: SERVER_ERROR,
+      error: `Unhandled exception occured on the server.`
+
+    };
+
+  }
+
+}
+
 
 
 module.exports = {
@@ -246,6 +320,7 @@ module.exports = {
   saveJobInDatabase,
   getJobsFromDatabase,
   updateJobInDatabase,
-  deletJobFromDatabase
+  deletJobFromDatabase,
+  getApplicantsFromDataBAse
 
 }

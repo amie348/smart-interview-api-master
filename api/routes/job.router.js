@@ -12,14 +12,15 @@ const { authenticateUser, authorizeInterviewer, authorizeCandidate } = require(`
 
 const { newJobSchema, getJobsSchema } = require(`../validators/job.schemas`);
 
-const { addJob, getJobs, applyForJob, deleteJob } = require(`../controllers/jobs.controllers`)
+const { addJob, getJobs, applyForJob, deleteJob, getApplicantsOfSpecificJob } = require(`../controllers/jobs.controllers`)
 
-jobRouter.post(`/add`, authenticateUser, authorizeInterviewer, validateInput(newJobSchema, BODY), addJob);
 
 jobRouter.get(`/recruiter/get`, authenticateUser, authorizeInterviewer, getJobs);
-
 jobRouter.get(`/candidate/get`, authenticateUser, authorizeCandidate,  getJobs);
+jobRouter.get(`/applicants/get/:_jobId`, authenticateUser, authorizeInterviewer,  getApplicantsOfSpecificJob);
 
+
+jobRouter.post(`/add`, authenticateUser, authorizeInterviewer, validateInput(newJobSchema, BODY), addJob);
 jobRouter.post(`/apply/:_jobId`, authenticateUser, authorizeCandidate, applyForJob)
 
 
