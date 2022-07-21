@@ -159,7 +159,7 @@ try{
 
     }
 
-    req.user._interviewerId = data._id;
+    req.user._interviewerId = data._id.toString();
 
     next()
 
@@ -184,12 +184,58 @@ try{
 
 } 
 
+const authorizeCandidate = async (req, res, next) => {
+
+  try{
+  
+  
+      const {status, data, error} = await findCandidate(req.user);
+  
+      if(status === NOT_FOUND){
+  
+        logError(`ERROR: interviewer not found in database while authorizing`)
+  
+        return res.status(NOT_FOUND).json({
+  
+          hasError: true,
+          messatge: error
+  
+        })
+  
+      }
+  
+      req.user.candidate = data;
+  
+      next()
+  
+    }
+    catch(error){
+  
+      logError(`ERROR while authorizing  interviewer`, error);
+  
+      res.status(SERVER_ERROR).json({
+  
+        hasError: true,
+        message: `error. requested operation failed`,
+        error: {
+  
+          error: `An unhandled exception occured on the server.`
+  
+        }
+  
+      })
+  
+    }
+  
+  }
+
 
 
 module.exports = {
 
   decodeActivationToken,
   authenticateUser,
-  authorizeInterviewer
+  authorizeInterviewer,
+  authorizeCandidate
 
 }

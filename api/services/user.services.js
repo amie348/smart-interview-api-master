@@ -265,11 +265,11 @@ const updateCandidateInfoInDatabase =  async (candidateData, _candidateId, user)
 
 }
 
-const findCandidate = async (_candidateId) => {
+const findCandidate = async (userData) => {
 
   try{
 
-    const candidate = await candidateModel.findOne({_id: _candidateId}).lean().exec();
+    const candidate = await candidateModel.findOne({_userId: userData._id}).lean().exec();
 
 
     if(!candidate){
@@ -286,13 +286,13 @@ const findCandidate = async (_candidateId) => {
     
     return {
       status: SUCCESS,
-      data: user
+      data: candidate
     }
 
   } catch(error) {
 
 
-    logError(`ERROR @ error while finding user`, error);
+    logError(`ERROR @ error while finding candidate`, error);
 
     throw(error)
 
@@ -439,7 +439,6 @@ const findInterviewer = async (userData) => {
   }
 
 }
-
 
 const addCompanyInfoInDatabase =  async (companyData, user) => {
 
