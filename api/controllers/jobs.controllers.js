@@ -1,5 +1,3 @@
-const bcrypt = require(`bcrypt`);
-
 // importing required packages and modules
 const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
 
