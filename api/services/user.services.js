@@ -62,11 +62,11 @@ const saveUser = async (userData) => {
 
 }
 
-const findUser = async (userData) => {
+const findUser = async (userQuery) => {
 
   try{
 
-    const user = await UserModel.findOne({_id: userData._id}).lean().exec();
+    const user = await UserModel.findOne(userQuery).lean().exec();
 
 
     if(!user){
@@ -106,6 +106,15 @@ const getUser = async (userData) => {
     // querying database for user
     const result = await UserModel.findOne({email: userData.email})
 
+    if(!result) {
+      return {
+        
+        status: FORBIDDEN,
+        error: "User Not found"
+
+      }
+    }
+
     const verify = await bcrypt.compare(userData.password, result.password)
 
 
@@ -113,7 +122,7 @@ const getUser = async (userData) => {
 
       return  {
 
-        status: UNAUTHORIZED,
+        status: FORBIDDEN,
         error: "Password is Incorect"
 
       }
@@ -265,11 +274,11 @@ const updateCandidateInfoInDatabase =  async (candidateData, _candidateId, user)
 
 }
 
-const findCandidate = async (userData) => {
+const findCandidate = async (userQuery) => {
 
   try{
 
-    const candidate = await candidateModel.findOne({_userId: userData._id}).lean().exec();
+    const candidate = await candidateModel.findOne(userQuery).lean().exec();
 
 
     if(!candidate){

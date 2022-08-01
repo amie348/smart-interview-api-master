@@ -2,29 +2,26 @@ const mongoose = require(`mongoose`);
 
 
 
-const meetingSchema = mongoose.Schema({
+const meetingSchema =new  mongoose.Schema({
 
   madeBy: { 
     type: mongoose.Schema.ObjectId, 
     ref: 'Interviewer' 
   },
-  candidateUserEmail: { 
-      type : String,
-      trim: true 
+  candidateId: { 
+    type: mongoose.Schema.ObjectId, 
+    ref: 'Candidate' 
   },
-  pin:{
-      type: String,
-  },
+//   candidateUserEmail: { 
+//     type: String
+//   },
+//   quizPin:{
+//       type: String,
+//   },
   expiryDate: {
-      type: Date,
+      type: Date
   },
   startDate: {
-      type: Date,
-  },
-  callStartTime: {
-      type: Date,
-  },
-  callEndingTime:{
       type: Date,
   },
   password: {
@@ -35,14 +32,19 @@ const meetingSchema = mongoose.Schema({
       trim: true,
       uppercase: true
   },
-  // joined: {
-  //     type: Number,
-  //     default: 0 //0 for not joined, 1 for joined
-  // }
-  
+  invitedMembers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Interviewer"
+  }],
+  startedAt: {
+    type: Date
+  },
+  endedAt: {
+    type: Date
+  }
 }, {
   timestamps: true
 })
 
 
-module.exports = mongoose.model("meeting", meetingSchema);
+module.exports = mongoose.model("Meeting", meetingSchema);

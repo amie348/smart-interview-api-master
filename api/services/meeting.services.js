@@ -2,6 +2,7 @@ const { logWarning, logError, logInfo } = require(`../helpers/console.helpers`);
 
 const MeetingModel = require(`../models/meeting.model`);
 
+const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, UNAUTHORIZED,  FORBIDDEN, NOT_FOUND, CONFLICT, SERVER_ERROR } } = require(`../config`);
 
 
 // this data service takes in user data obj and _creater, saves 
@@ -49,10 +50,62 @@ const saveMeetingInDatabase = async (meetingData, user) => {
 
 }
 
+const updateMeetingInfoInDatabase =  async (meetingData, _meetingId) => {
+
+  try {
+   
+    
+      logInfo(`Info .. Updating Meeting Information `)
+      
+      // saving franchise in the database
+      const result = await candidateModel.findOneAndUpdate({_id: _meetingId}, meetingData, {new: true});
+      
+      if(!result){
+      
+          // returning saved response to it's caller 
+          return{
+      
+            status: NOT_FOUND,
+            error: "meeting Not found"
+        
+        };
+
+      }  
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: SUCCESS,
+          data: result
+      
+      };
+  
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // setting value of status and description
+    const [status, err] = [SERVER_ERROR,`Updating Meeting Information failed.`];
+      
+    logError(`ERROR @ updateMeetingInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
+
 
 
 module.exports = {
 
-  saveMeetingInDatabase
+  saveMeetingInDatabase,
+  updateMeetingInfoInDatabase
 
 }

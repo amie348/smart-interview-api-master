@@ -13,7 +13,7 @@ const { APP_MODE, NODE_PORT } = require(`./api/config`);
 // importing required routers
 const { userRouter } = require(`./api/routes/use.router`);
 const { jobRouter } = require(`./api/routes/job.router`)
-
+const { meetingRouter } = require(`./api/routes/meeting.router`)
 
 // creatig express server by calling express constructor 
 const server = express();
@@ -43,6 +43,7 @@ const server = express();
     // api handlers
 		server.use(`/api/user`, userRouter)
     server.use(`/api/job`, jobRouter)
+    server.use(`/api/meeting`, meetingRouter)
 
 
 		// logging message to the console

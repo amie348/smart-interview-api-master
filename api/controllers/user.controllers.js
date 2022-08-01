@@ -4,7 +4,7 @@ const bcrypt = require(`bcrypt`);
 const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../config`);
+const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR, FORBIDDEN }, CLIENT_BASE_URL } = require(`../config`);
 
 // importing required jwt helpers 
 const { createAccessToken, createRefreshToken, createActivationToken } = require(`../helpers/jwt.helpers`);
@@ -203,7 +203,7 @@ const login = async (req, res) => {
 
       });
 
-    }else if (status === UNAUTHORIZED) {
+    }else if (status === FORBIDDEN) {
       // this code runs in case data service failed due to
       // duplication value
 
@@ -211,7 +211,7 @@ const login = async (req, res) => {
       logError(error);
 
       // returning the response with an error message
-      return res.status(NOT_FOUND).json({
+      return res.status(FORBIDDEN).json({
 
         hasError: true,
         message: `ERROR: Requested operation failed.`,
@@ -317,6 +317,16 @@ const addCandidateInfo = async (req, res) => {
       });
 
     }
+
+    return res.status(CREATED).json({
+
+      hasError: false,
+      message: "Candidate Information Added Successfully",
+      data: {
+        data
+      }
+
+    })
 
   } catch(error){
 

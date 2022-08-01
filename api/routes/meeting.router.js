@@ -10,9 +10,14 @@ const { ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY,PARAMS , QUERY, NONE }} = requi
 
 const { authenticateUser, authorizeInterviewer, authorizeCandidate } = require(`../middlewares/authentication.middleware`);
 
-const { addMeeting } = require(`../controllers/meeting.controllers`)
+const { newMeetingSchema, updateMeetingSchema, joinMeetingSchema } = require(`../validators/meeting.schemas`)
 
-meetingRouter.post(`/add`, authenticateUser, authorizeInterviewer, validateInput(), addMeeting )
+const { addMeeting, updateMeetingById } = require(`../controllers/meeting.controllers`)
+
+
+
+meetingRouter.post(`/add`, authenticateUser, authorizeInterviewer, validateInput(newMeetingSchema, BODY), addMeeting)
+meetingRouter.patch(`/update/_meetingId`, authenticateUser, authorizeInterviewer, validateInput(updateMeetingSchema, BODY), updateMeetingById)
 
 
 

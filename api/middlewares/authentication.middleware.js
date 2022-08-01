@@ -99,7 +99,7 @@ const authenticateUser = async(req,res, next) => {
 
     }
 
-    const {status, data, error} = await findUser(tokenData);
+    const {status, data, error} = await findUser({_id: tokenData._id});
 
     if(status === NOT_FOUND){
 
@@ -189,7 +189,7 @@ const authorizeCandidate = async (req, res, next) => {
   try{
   
   
-      const {status, data, error} = await findCandidate(req.user);
+      const {status, data, error} = await findCandidate({_userId: req.user._id});
   
       if(status === NOT_FOUND){
   
