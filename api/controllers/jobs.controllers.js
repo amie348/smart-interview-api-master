@@ -4,8 +4,8 @@ const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers
 // importing response status codes
 const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../config`);
 
-const { saveJobInDatabase, getJobsFromDatabase, updateJobInDatabase, deletJobFromDatabase, getApplicantsFromDataBAse } = require(`../services/job.services`)
-
+const { saveJobInDatabase, getJobsFromDatabase, updateJobInDatabase, deletJobFromDatabase, getApplicantsFromDataBAse, addMeetinginJobApplication } = require(`../services/job.services`)
+const { saveMeetingInDatabase } = require(`../services/meeting.services`)
 
 
 const addJob = async (req, res) => {
@@ -132,7 +132,7 @@ const applyForJob = async(req, res) => {
 
   try{
 
-    const updateQuery = {$push: {appliedBy : req.user.candidate._id}}
+    const updateQuery = {$push: {applications: {appliedBy : req.user._id, createdAt: new Date() }}}
 
     const {_jobId} = req.params
 
@@ -319,14 +319,63 @@ const getApplicantsOfSpecificJob = async(req, res) => {
 
 }
 
+const ScheduleMeeting = async (req, res) => {
 
+  try{
+
+    const {_jobId, _applicationId} = req.params
+
+    // adding candidate id in the meeting object 
+    // req.body.candidateId = data._id
+
+    // saving the meeting in the database
+    var {status, data, error} = await saveMeetingInDatabase(req.body, req.user);
+
+    var {status, data, error} = await addMeetinginJobApplication(_applicationId, _jobId,  data._id);
+
+
+
+
+    // sending email to candidate for meeting alert
+    // meetingAlertEmail(req.body.candidateUserEmail, req.user, data)
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Meeting Scheduled Successfully",
+      data: {
+        data
+      }
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ addJob`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+      
+        error
+      
+      }
+
+    })
+
+  }
+}
 
 module.exports =  {
 
   addJob,
   getJobs,
   deleteJob,
+
   applyForJob,
-  getApplicantsOfSpecificJob
+  getApplicantsOfSpecificJob,
+  ScheduleMeeting
 
 }

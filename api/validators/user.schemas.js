@@ -21,7 +21,7 @@ const registerUserSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   email: Joi.string().email().required(),
   password: passwordComplexity(complexityOptions).required(),
-  role : Joi.string().valid(...ALLOWED_USER_ROLES).required()
+  // role : Joi.string().valid(...ALLOWED_USER_ROLES).required()
 
 })
 
@@ -45,7 +45,7 @@ const educationSchema = Joi.object({
 
   qualification: Joi.string().required(),
   instituteName: Joi.string().required(),
-  completionYear: Joi.string().required()
+  completionYear: Joi.number().required()
 
 })
 
@@ -57,18 +57,19 @@ const workExperienceSchema = Joi.object({
   endDate: Joi.date().required(),
   address: Joi.string().required()
 
-})
+});
 
 
 const candidateSchema = Joi.object({
 
   age: Joi.number().required(),
+  city: Joi.string().required(),
+  phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
   address: Joi.string().required(),
   skills: Joi.array().items(Joi.string()).required(),
   education: Joi.array().items(educationSchema),
   workExperience: Joi.array().items(workExperienceSchema),
-  desiredJobTitles: Joi.array().items(Joi.string().required()).required(),
-  phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
+  desiredJobTitles: Joi.array().items(Joi.string().required()),
   remoteWork: Joi.bool()
 
 })
@@ -98,26 +99,6 @@ const interviewerIdSchema = Joi.object({
 
 })
 
-const interviewerSchema = Joi.object({
-
-  age: Joi.number().required(),
-  address: Joi.string().required(),
-  city: Joi.string().required(),
-  education: educationSchema.required(),
-  phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
-
-})
-
-const updateInterviewerSchema = Joi.object({
-
-  age: Joi.number(),
-  address: Joi.string(),
-  city: Joi.string(),
-  education: educationSchema,
-  phoneNumber: Joi.string(),//.custom(validatePhoneNo, `Validating Phone Number`),
-
-})
-
 const companySchema = Joi.object({
 
   companyName: Joi.string().required(),
@@ -135,7 +116,6 @@ const companySchema = Joi.object({
 
 })
 
-
 const updateCompnaySchema = Joi.object({
 
   companyName: Joi.string(),
@@ -152,6 +132,33 @@ const updateCompnaySchema = Joi.object({
   contactNo: Joi.string(),
 
 })
+
+
+const interviewerSchema = Joi.object({
+
+  age: Joi.number().required(),
+  address: Joi.string().required(),
+  city: Joi.string().required(),
+  phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
+  education: educationSchema.required(),
+  company: companySchema.required()
+})
+
+const updateInterviewerSchema = Joi.object({
+
+  age: Joi.number(),
+  address: Joi.string(),
+  city: Joi.string(),
+  phoneNumber: Joi.string(),//.custom(validatePhoneNo, `Validating Phone Number`),
+  education: educationSchema,
+  company: companySchema.required()
+
+})
+
+
+
+
+
 
 // exporting input validation schemas as module
 module.exports = {

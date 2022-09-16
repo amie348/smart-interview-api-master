@@ -12,14 +12,14 @@ const newJobSchema = Joi.object({
   }),
   jobDescription: Joi.string().required(),
   workhours: Joi.number().required(),
-  postPicture: Joi.string().required(),
+  postPicture: Joi.string().allow("", null),
   skills: Joi.array().items(Joi.string()).required(),
   location: Joi.string().required(),
   experience: Joi.number().required(),
   qualification: Joi.string().required(),
   careerLevel: Joi.string().required(),
   expiryDate: Joi.date().required(),
-  remoteWork: Joi.boolean().required()
+  workType: Joi.string().required()
 })
 
 const getJobsSchema = Joi.object({

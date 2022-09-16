@@ -28,11 +28,7 @@ const validateInput = (inputSchema, schemaScope) => {
 
           hasError: true,
           message: `ERROR: Data Validation Failed.`,
-          error: {
-
-            error: `Incoming request body can't be empty.`
-
-          }
+          error: `Incoming request body can't be empty.`
 
         });
 

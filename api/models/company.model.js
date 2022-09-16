@@ -4,10 +4,6 @@ const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema({
 
-  _madeBy: { 
-    type: mongoose.Schema.ObjectId, 
-    ref: 'interviewer' 
-  },
   companyName: {
     type: String,
   },

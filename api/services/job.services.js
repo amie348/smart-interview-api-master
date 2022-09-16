@@ -110,7 +110,16 @@ const getJobsFromDatabase = async (body,user) => {
     // querying database for user
     
     
-    const jobs = await JobModel.find(filters).lean().exec();
+    const jobs = await JobModel.find(filters)
+    .populate({path: `postedBy`, 
+              select:`_userId`, 
+              populate: { path:`_userId`, 
+                          select: `username email`
+                        }, 
+              populate: { path:`company`, 
+                      select: `companyName`
+                      }, 
+              });;
 
     if(!jobs){
 
@@ -244,47 +253,52 @@ const getApplicantsFromDataBAse = async (_jobId, user) => {
 
   try {
 
+    console.log(_jobId,"_jobId")
     
-    const pipeline = [
-      {
-        '$match': {
-          '_id': mongoose.Types.ObjectId(_jobId)
-        }
-      }, {
-        '$project': {
-          '_id': 1, 
-          'appliedBy': 1, 
-          'title': 1
-        }
-      }, {
-        '$lookup': {
-          'from': 'candidates', 
-          'let': {
-            'applicants': '$appliedBy'
-          }, 
-          'pipeline': [
-            {
-              '$match': {
-                '$expr': {
-                  '$in': [
-                    '$_id', '$$applicants'
-                  ]
-                }
-              }
-            }, {
-              '$project': {
-                '_id': 1, 
-                'phoneNumber': 1, 
-                'address': 1
-              }
-            }
-          ], 
-          'as': 'applicants'
-        }
-      }
-    ]
+    // const pipeline = [
+    //   {
+    //     '$match': {
+    //       '_id': mongoose.Types.ObjectId(_jobId)
+    //     }
+    //   }, {
+    //     '$project': {
+    //       '_id': 1, 
+    //       'appliedBy': 1, 
+    //       'title': 1
+    //     }
+    //   }, {
+    //     '$lookup': {
+    //       'from': 'candidates', 
+    //       'let': {
+    //         'applicants': '$appliedBy'
+    //       }, 
+    //       'pipeline': [
+    //         {
+    //           '$match': {
+    //             '$expr': {
+    //               '$in': [
+    //                 '$_id', '$$applicants'
+    //               ]
+    //             }
+    //           }
+    //         }, {
+    //           '$project': {
+    //             '_id': 1, 
+    //             'phoneNumber': 1, 
+    //             'address': 1
+    //           }
+    //         }
+    //       ], 
+    //       'as': 'applicants'
+    //     }
+    //   }
+    // ]
 
-    const applicants = (await JobModel.aggregate(pipeline).exec())[0];
+    // const applicants = (await JobModel.aggregate(pipeline).exec())[0];
+
+    const applicants = await JobModel.findOne({_id: _jobId}, {_id: 1, applications: 1, title: 1})
+    .populate([{
+      path:"applications.appliedBy", select:'email username'},{ path:"applications.meetingId", select:'email username'}])
 
 
     // returning saved system permissions to its caller
@@ -313,6 +327,52 @@ const getApplicantsFromDataBAse = async (_jobId, user) => {
 
 }
 
+const addMeetinginJobApplication = async (_applicationId, _jobId, _meetingId) => {
+
+  try {
+
+    
+    const job = await JobModel.findOneAndUpdate({_id: _jobId, 'applications._id': _applicationId},
+                {$set: {'applications.$.meetingId': _meetingId}} ,{new: true});
+
+    if(!job){
+
+      return {
+
+        status: NOT_FOUND,
+        error: `Job Not Found with given paramters`
+
+      }
+
+    }
+
+
+    // returning saved system permissions to its caller
+    return {
+
+      status: SUCCESS,
+      data: job
+
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // loggine error messages to the console
+    logError(`ERROR @ updateJobInDatabase `, error);
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status: SERVER_ERROR,
+      error: `Unhandled exception occured on the server.`
+
+    };
+
+  }
+
+}
+
 
 
 module.exports = {
@@ -321,6 +381,7 @@ module.exports = {
   getJobsFromDatabase,
   updateJobInDatabase,
   deletJobFromDatabase,
-  getApplicantsFromDataBAse
+  getApplicantsFromDataBAse,
+  addMeetinginJobApplication
 
 }

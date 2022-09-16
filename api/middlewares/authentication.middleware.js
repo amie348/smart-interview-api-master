@@ -1,7 +1,7 @@
 const jwt = require(`jsonwebtoken`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { BAD_REQUEST, SERVER_ERROR, NOT_FOUND, UNAUTHORIZED } } = require(`../config`);
+const { HTTP_STATUS_CODES: { BAD_REQUEST, SERVER_ERROR, NOT_FOUND, UNAUTHORIZED, FORBIDDEN } } = require(`../config`);
 
 // importing required packages and modules
 const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
@@ -150,7 +150,7 @@ try{
 
       logError(`ERROR: interviewer not found in database while authorizing`)
 
-      return res.status(NOT_FOUND).json({
+      return res.status(FORBIDDEN).json({
 
         hasError: true,
         messatge: error

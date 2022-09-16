@@ -62,7 +62,7 @@ const sendActivationEmail = async (to, url, txt) => {
   })
 }
 
-const meetingAlertEmail = async (to, user, meeting) => {
+const meetingAlertEmail = async (to, user, meeting, test) => {
   oauth2Client.setCredentials({
       refresh_token :  GOOGLE_APP_REFRESH_TOKEN
   })
@@ -90,6 +90,10 @@ const meetingAlertEmail = async (to, user, meeting) => {
     
     <p>Hey! this mail is to inform you that You have a meeting scheduled with ${user.username}, which will be available after ${meeting.startDate} 
     and it will expire at ${meeting.expiryDate}. please make surev to be available at this time periode</p>
+
+    <p>A Test is also shared with you which has ${test.amount} multiple choice questions. The time duration for this assesment is ${test.time}</p>
+    <p>The pin to attemp the test is ${test.pin}</p>
+    
 
     
     </div>

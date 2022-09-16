@@ -312,7 +312,20 @@ const findCandidate = async (userQuery) => {
 const addInterviewerInfoInDatabase =  async (interviewerData, user) => {
 
   try {
-  
+
+    let companyData = interviewerData.company;
+    delete interviewerData['company']
+
+    const newCompany = new companyModel(companyData);
+
+      logInfo(`Info .. Adding Company of Interviewer Information `)
+      
+      // saving company in the database
+      let result = await newCompany.save();
+      
+      interviewerData.company = result._id
+
+
       // creating object to store new User 
       const newInterviewer = new interviewerModel({
           _userId: user._id,
@@ -321,8 +334,8 @@ const addInterviewerInfoInDatabase =  async (interviewerData, user) => {
   
       logInfo(`Info .. Adding Interviewer Information `)
       
-      // saving franchise in the database
-      const result = await newInterviewer.save();
+      // saving interviewer in the database
+      result = await newInterviewer.save();
   
   
       // returning saved response to it's caller 
@@ -345,7 +358,7 @@ const addInterviewerInfoInDatabase =  async (interviewerData, user) => {
     const duplicateErrorFields = (Object.keys(error.keyValue)).join(`, `);
 
     // setting value of status and description
-    const [status, err] = [isDuplicateError ? CONFLICT : SERVER_ERROR, isDuplicateError ? `Adding interviewer information failed due to duplicate ${duplicateErrorFields}.` : `Adding INterviewer Information failed.`];
+    const [status, err] = [isDuplicateError ? CONFLICT : SERVER_ERROR, isDuplicateError ? `Adding interviewer information failed due to duplicate ${duplicateErrorFields}.` : `Adding Interviewer Information failed.`];
       
     logError(`ERROR @ addInterviewerInfoInDatabase `, err);
   

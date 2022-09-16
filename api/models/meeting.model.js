@@ -5,16 +5,20 @@ const mongoose = require(`mongoose`);
 const meetingSchema =new  mongoose.Schema({
 
   madeBy: { 
-    type: mongoose.Schema.ObjectId, 
+    type: mongoose.Types.ObjectId, 
     ref: 'Interviewer' 
   },
-  candidateId: { 
-    type: mongoose.Schema.ObjectId, 
-    ref: 'Candidate' 
+  test: {
+    type: mongoose.Types.ObjectId,
+    ref: `test`
   },
-//   candidateUserEmail: { 
-//     type: String
-//   },
+  // candidateId: { 
+  //   type: mongoose.Schema.ObjectId, 
+  //   ref: 'Candidate' 
+  // },
+  candidateUserEmail: { 
+    type: String
+  },
 //   quizPin:{
 //       type: String,
 //   },
@@ -47,4 +51,4 @@ const meetingSchema =new  mongoose.Schema({
 })
 
 
-module.exports = mongoose.model("Meeting", meetingSchema);
+module.exports = mongoose.model("meeting", meetingSchema);
