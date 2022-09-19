@@ -1,71 +1,90 @@
 const bcrypt = require(`bcrypt`);
 
 // importing required packages and modules
-const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
+const {
+  logWarning,
+  logError,
+  logSuccess,
+} = require(`../helpers/console.helpers`);
 
 // importing response status codes
-const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR, FORBIDDEN }, CLIENT_BASE_URL } = require(`../config`);
+const {
+  HTTP_STATUS_CODES: {
+    SUCCESS,
+    CREATED,
+    BAD_REQUEST,
+    NOT_FOUND,
+    UNAUTHORIZED,
+    CONFLICT,
+    SERVER_ERROR,
+    FORBIDDEN,
+  },
+  CLIENT_BASE_URL,
+} = require(`../config`);
 
-// importing required jwt helpers 
-const { createAccessToken, createRefreshToken, createActivationToken } = require(`../helpers/jwt.helpers`);
+// importing required jwt helpers
+const {
+  createAccessToken,
+  createRefreshToken,
+  createActivationToken,
+} = require(`../helpers/jwt.helpers`);
 
 // importing required mail helpers
 const { sendActivationEmail } = require("../services/mail");
 
-const { saveUser, getUser, addCandidateInfoInDatabase, updateCandidateInfoInDatabase, addInterviewerInfoInDatabase, updateInterviewerInfoInDatabase, addCompanyInfoInDatabase, updateCompanyInfoInDatabase } = require(`../services/user.services`)
-
+const {
+  saveUser,
+  getUser,
+  addCandidateInfoInDatabase,
+  findCandidate,
+  updateCandidateInfoInDatabase,
+  addInterviewerInfoInDatabase,
+  findInterviewer,
+  updateInterviewerInfoInDatabase,
+  addCompanyInfoInDatabase,
+  updateCompanyInfoInDatabase,
+} = require(`../services/user.services`);
 
 const register = async (req, res) => {
-
-  try{
-
-    const {username, email, password, role, } = req.body;
+  try {
+    const { username, email, password, role } = req.body;
 
     // hashing password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    
     // creating activation code
-    const activationToken = await createActivationToken({username, [`password`]: hashedPassword, role, email});
+    const activationToken = await createActivationToken({
+      username,
+      [`password`]: hashedPassword,
+      role,
+      email,
+    });
 
-    let url = `${CLIENT_BASE_URL}/user/activate?activation_token=${activationToken}`
+    let url = `${CLIENT_BASE_URL}/activate/${activationToken}`;
 
-    sendActivationEmail(email, url, `Confirm By Email`)
+    sendActivationEmail(email, url, `Confirm By Email`);
 
-    logSuccess(`Confirmation Mail Sent Through Mail`)
+    logSuccess(`Confirmation Mail Sent Through Mail`);
 
     res.status(SUCCESS).json({
-
       hasError: false,
-      message: "Confirmation mail sent to your email"
-
-    })
-
-  }
-  catch(error){
-
+      message: "Confirmation mail sent to your email",
+    });
+  } catch (error) {
     logError(`ERROR while registering a new user`, error);
 
     res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: `error. requested operation failed`,
       error: {
-
-        error: `An unhandled exception occured on the server.`
-
-      }
-
-    })
-
+        error: `An unhandled exception occured on the server.`,
+      },
+    });
   }
+};
 
-}
-
-const activate = async (req,res) => {
-
-  try{
-
+const activate = async (req, res) => {
+  try {
     const { status, data, error } = await saveUser(req.tokenData);
 
     // checking the result of the operation
@@ -78,89 +97,67 @@ const activate = async (req,res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
-    const user = {_id : data._id, email: data.email, username: data.username, role: data.role}
+    const user = {
+      _id: data._id,
+      email: data.email,
+      username: data.username,
+      role: data.role,
+    };
 
-    
-
-    const token = await createAccessToken(user)
+    const token = await createAccessToken(user);
 
     // returning the response with success message
     return res.status(CREATED).json({
-
       hasError: false,
       message: `SUCCESS: Requested operation successful.`,
       data: {
-
         user,
-        token
-
-      }
-
+        token,
+      },
     });
+  } catch (error) {
+    logError(`ERROR while registering a new user`, error);
 
+    res.status(SERVER_ERROR).json({
+      hasError: true,
+      message: `error. requested operation failed`,
+      error: {
+        error: `An unhandled exception occured on the server.`,
+      },
+    });
   }
-  catch(error){
-
-      logError(`ERROR while registering a new user`, error);
-
-      res.status(SERVER_ERROR).json({
-
-        hasError: true,
-        message: `error. requested operation failed`,
-        error: {
-
-          error: `An unhandled exception occured on the server.`
-
-        }
-
-      })
-
-  }
-}
+};
 
 const login = async (req, res) => {
-
-  try{
-
+  try {
     const { email, password } = req.body;
 
-
-    const {status, data, error } = await getUser({email, password})
-
-
+    const { status, data, error } = await getUser({ email, password });
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -172,17 +169,12 @@ const login = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === NOT_FOUND) {
       // this code runs in case data service failed due to
       // duplication value
@@ -192,18 +184,13 @@ const login = async (req, res) => {
 
       // returning the response with an error message
       return res.status(NOT_FOUND).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
-    }else if (status === FORBIDDEN) {
+    } else if (status === FORBIDDEN) {
       // this code runs in case data service failed due to
       // duplication value
 
@@ -212,68 +199,92 @@ const login = async (req, res) => {
 
       // returning the response with an error message
       return res.status(FORBIDDEN).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
-
-    const user = {_id : data._id, email: data.email, username: data.username, role: data.role}
-
+    const user = {
+      _id: data._id,
+      email: data.email,
+      username: data.username,
+      role: data.role,
+    };
 
     const accessToken = createAccessToken(user);
 
-
     logSuccess(`Requested Operation Completed. User Logged inn successfully`);
 
-
     res.status(SUCCESS).json({
-
       hasError: false,
       message: `Logged In Successully`,
       data: {
-    
         user,
-        accessToken
-    
+        accessToken,
       },
-
-    })
-
-
-  } catch(error) {
-
-    logError(`ERROR while loging user in`, error)
+    });
+  } catch (error) {
+    logError(`ERROR while loging user in`, error);
 
     res.status(SERVER_ERROR).json({
-
       hasError: true,
-        message: `error. requested operation failed`,
-        error: {
-
-          error: `An unhandled exception occured on the server.`
-
-        }
-
-    })
-
+      message: `error. requested operation failed`,
+      error: {
+        error: `An unhandled exception occured on the server.`,
+      },
+    });
   }
+};
 
-}
+const getCandidateInfo = async (req, res) => {
+  try {
+    const { status, data, error } = await findCandidate({
+      _userId: req.user._id,
+    });
+
+    // checking the result of the operation
+    if (status === NOT_FOUND) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`CadndidateNot Found In The Dabase Please add it.`);
+
+      // returning the response with an error message
+      return res.status(NOT_FOUND).json({
+        hasError: true,
+        message: `Please add candidate info first`,
+        error: error,
+      });
+    }
+
+    return res.status(SUCCESS).json({
+      hasError: false,
+      message: "Candidate Information Fetched Successfully",
+      data: data,
+    });
+  } catch (error) {
+    logError(`ERROR @ getCandidateInfo`, error);
+
+    return res.status(SERVER_ERROR).json({
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+        error,
+      },
+    });
+  }
+};
 
 const addCandidateInfo = async (req, res) => {
-
-  try{
-
-    const  {status, data, error} = await addCandidateInfoInDatabase(req.body, req.user);
+  try {
+    const { status, data, error } = await addCandidateInfoInDatabase(
+      req.body,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -285,76 +296,60 @@ const addCandidateInfo = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(CREATED).json({
-
       hasError: false,
       message: "Candidate Information Added Successfully",
       data: {
-        data
-      }
-
-    })
-
-  } catch(error){
-
-    logError(`ERROR @ addCandidateInfo`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ addCandidateInfo`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
-
-}
+};
 
 const updateCandidateInfoById = async (req, res) => {
-
-  try{
-
+  try {
     const { _candidateId } = req.params;
 
-    const  {status, data, error} = await updateCandidateInfoInDatabase(req.body, _candidateId, req.user);
+    const { status, data, error } = await updateCandidateInfoInDatabase(
+      req.body,
+      _candidateId,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -366,75 +361,57 @@ const updateCandidateInfoById = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(SUCCESS).json({
-
       hasError: false,
       message: "Candidate Information Added Successfully",
       data: {
-        data
-      }
-
-    })
-  
-  
-  } catch(error){
-
-    logError(`ERROR @ addCandidateInfo`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ addCandidateInfo`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
-
-}
+};
 
 const addInterviewerInfo = async (req, res) => {
-
-  try{
-
-    const  {status, data, error} = await addInterviewerInfoInDatabase(req.body, req.user);
+  try {
+    const { status, data, error } = await addInterviewerInfoInDatabase(
+      req.body,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -446,76 +423,98 @@ const addInterviewerInfo = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(SUCCESS).json({
-
       hasError: false,
       message: "INterviewer Information Added Successfully",
       data: {
-        data
-      }
-
-    })
-
-  } catch(error){
-
-    logError(`ERROR @ addCandidateInfo`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ addCandidateInfo`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
+};
 
-}
+const getInterviewerInfo = async (req, res) => {
+  try {
+    const { status, data, error } = await findInterviewer(req.user);
+
+    // checking the result of the operation
+    if (status === NOT_FOUND) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Interviewer Not Found In The Dabase Please add it.`);
+
+      // returning the response with an error message
+      return res.status(NOT_FOUND).json({
+        hasError: true,
+        message: `Please add Interviewer info first`,
+        error: error,
+      });
+    }
+
+    return res.status(SUCCESS).json({
+      hasError: false,
+      message: "Interviewer Information Fetched Successfully",
+      data: data,
+    });
+  } catch (error) {
+    logError(`ERROR @ getInterviewerInfo`, error);
+
+    return res.status(SERVER_ERROR).json({
+      hasError: true,
+      message: "internal server error occured",
+      error: {
+        error,
+      },
+    });
+  }
+};
 
 const updateInterviewerInfoById = async (req, res) => {
-
-  try{
-
+  try {
     const { _interviewerId } = req.params;
 
-    const  {status, data, error} = await updateInterviewerInfoInDatabase(req.body, _interviewerId, req.user);
+    const { status, data, error } = await updateInterviewerInfoInDatabase(
+      req.body,
+      _interviewerId,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -527,75 +526,57 @@ const updateInterviewerInfoById = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(SUCCESS).json({
-
       hasError: false,
       message: "Interviewer Information Updated Successfully",
       data: {
-        data
-      }
-
-    })
-  
-  
-  } catch(error){
-
-    logError(`ERROR @ addCandidateInfo`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ addCandidateInfo`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
-
-}
+};
 
 const addCompanyInfo = async (req, res) => {
-
-  try{
-
-    const  {status, data, error} = await addCompanyInfoInDatabase(req.body, req.user);
+  try {
+    const { status, data, error } = await addCompanyInfoInDatabase(
+      req.body,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -607,76 +588,60 @@ const addCompanyInfo = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(SUCCESS).json({
-
       hasError: false,
       message: "Company Information Added Successfully",
       data: {
-        data
-      }
-
-    })
-
-  } catch(error){
-
-    logError(`ERROR @ addCandidateInfo`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ addCandidateInfo`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
-
-}
+};
 
 const updateCompanyInfoById = async (req, res) => {
-
-  try{
-
+  try {
     const { _companyId } = req.params;
 
-    const  {status, data, error} = await updateCompanyInfoInDatabase(req.body, _companyId, req.user);
+    const { status, data, error } = await updateCompanyInfoInDatabase(
+      req.body,
+      _companyId,
+      req.user
+    );
 
     // checking the result of the operation
     if (status === SERVER_ERROR) {
@@ -688,84 +653,65 @@ const updateCompanyInfoById = async (req, res) => {
 
       // returning the response with an error message
       return res.status(SERVER_ERROR).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     } else if (status === CONFLICT) {
       // this code runs in case data service failed due to
       // duplication value
 
       // logging error message to the console
-      logError(`Requested operation failed. User with duplicate field(s) exists.`);
+      logError(
+        `Requested operation failed. User with duplicate field(s) exists.`
+      );
 
       // returning the response with an error message
       return res.status(CONFLICT).json({
-
         hasError: true,
         message: `ERROR: Requested operation failed.`,
         error: {
-
-          error
-
-        }
-
+          error,
+        },
       });
-
     }
 
     return res.status(SUCCESS).json({
-
       hasError: false,
       message: "Company Information Updated Successfully",
       data: {
-        data
-      }
-
-    })
-  
-  
-  } catch(error){
-
-    logError(`ERROR @ updateCompanyInfoById`, error)
+        data,
+      },
+    });
+  } catch (error) {
+    logError(`ERROR @ updateCompanyInfoById`, error);
 
     return res.status(SERVER_ERROR).json({
-
       hasError: true,
       message: "internal server error occured",
       error: {
-      
-        error
-      
-      }
-
-    })
-
+        error,
+      },
+    });
   }
-
-}
+};
 
 // exporting controllers as modules
 module.exports = {
-
   login,
   activate,
   register,
-  
+
+  getCandidateInfo,
   addCandidateInfo,
   updateCandidateInfoById,
-  
+
   addInterviewerInfo,
   updateInterviewerInfoById,
-  
-  addCompanyInfo,
-  updateCompanyInfoById
+  getInterviewerInfo,
 
-}
+  addCompanyInfo,
+  updateCompanyInfoById,
+};

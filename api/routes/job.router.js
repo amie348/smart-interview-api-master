@@ -14,9 +14,11 @@ const { newJobSchema, getJobsSchema } = require(`../validators/job.schemas`);
 const { newMeetingSchema } = require(`../validators/meeting.schemas`)
 
 
-const { addJob, getJobs, applyForJob, deleteJob, getApplicantsOfSpecificJob, ScheduleMeeting } = require(`../controllers/jobs.controllers`)
+const { addJob, getJobs, applyForJob, deleteJob, getApplicantsOfSpecificJob, ScheduleMeeting, getSpecificJob, updateSpecificJob } = require(`../controllers/jobs.controllers`)
 
 
+jobRouter.patch(`/update-specific/:_jobId`, authenticateUser, authorizeInterviewer, updateSpecificJob);
+jobRouter.get(`/get-specific/:_jobId`, authenticateUser, authorizeInterviewer, getSpecificJob);
 jobRouter.get(`/recruiter/get`, authenticateUser, authorizeInterviewer, getJobs);
 jobRouter.get(`/candidate/get`, authenticateUser, authorizeCandidate,  getJobs);
 jobRouter.get(`/:_jobId/applicants/get`, authenticateUser, authorizeInterviewer,  getApplicantsOfSpecificJob);

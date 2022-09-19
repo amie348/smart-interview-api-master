@@ -12,9 +12,6 @@ const testSchema = new mongoose.Schema({
   pin: {
     type: String,
   },
-  // email: {
-  //   type: String,
-  // },
   amount: {
     type: String,
   },
@@ -24,6 +21,21 @@ const testSchema = new mongoose.Schema({
   time: {
     type: String,
   },
+  score: {
+    type: Number
+  },
+  questions: [{
+    statement : {
+      type: String
+    },
+    options: [String],
+    correct: {
+      type: String
+    },
+    submitted: {
+      type: String,
+    }
+  }],
   attempted: {
     type: Boolean,
     default: false

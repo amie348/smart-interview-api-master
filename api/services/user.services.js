@@ -226,6 +226,8 @@ const updateCandidateInfoInDatabase =  async (candidateData, _candidateId, user)
    
     
       logInfo(`Info .. Updating Candidate Information `)
+
+      console.log(candidateData)
       
       // saving franchise in the database
       const result = await candidateModel.findOneAndUpdate({_id: _candidateId, _userId: user._id}, candidateData, {new: true});
@@ -431,7 +433,7 @@ const findInterviewer = async (userData) => {
   try{
 
 
-    const interviewer = await interviewerModel.findOne({_userId: userData._id}).lean().exec();
+    const interviewer = await interviewerModel.findOne({_userId: userData._id}).populate("company");
 
 
     if(!interviewer){

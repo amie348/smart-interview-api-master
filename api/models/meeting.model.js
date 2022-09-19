@@ -45,6 +45,10 @@ const meetingSchema =new  mongoose.Schema({
   },
   endedAt: {
     type: Date
+  },
+  connection: {
+    type: String,
+    default: ""
   }
 }, {
   timestamps: true

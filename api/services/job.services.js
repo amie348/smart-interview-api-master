@@ -327,6 +327,41 @@ const getApplicantsFromDataBAse = async (_jobId, user) => {
 
 }
 
+
+
+const getSpecificJobById = async (_jobId, user) => {
+
+  try {
+
+    const job = await JobModel.findOne({_id: _jobId, postedBy: user._interviewerId}, {applications:0})
+
+    // returning saved system permissions to its caller
+    return {
+
+      status: SUCCESS,
+      data: job
+
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // loggine error messages to the console
+    logError(`ERROR @ getUser -> user.services.js`, error);
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status: SERVER_ERROR,
+      error: `Unhandled exception occured on the server.`
+
+    };
+
+  }
+
+}
+
+
 const addMeetinginJobApplication = async (_applicationId, _jobId, _meetingId) => {
 
   try {
@@ -378,6 +413,7 @@ const addMeetinginJobApplication = async (_applicationId, _jobId, _meetingId) =>
 module.exports = {
 
   saveJobInDatabase,
+  getSpecificJobById,
   getJobsFromDatabase,
   updateJobInDatabase,
   deletJobFromDatabase,

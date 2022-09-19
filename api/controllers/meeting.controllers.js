@@ -1,10 +1,11 @@
 // importing required packages and modules
 const { logWarning, logError, logSuccess } = require(`../helpers/console.helpers`);
+const axios = require("axios")
 
 // importing response status codes
 const { HTTP_STATUS_CODES: { SUCCESS, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT, SERVER_ERROR }, CLIENT_BASE_URL } = require(`../config`);
 
-const { saveMeetingInDatabase, updateMeetingInfoInDatabase, getCandidateMeetingsFromDatabase, getInterviewerMeetingsFromDatabase, saveTestInDatabase, getQuizNamesFromDatabase, getInterviewerTestsFromDatabase, getSpecificTestFromDataBase, getCandidateTestsFromDatabase } = require(`../services/meeting.services`)
+const { saveMeetingInDatabase, updateMeetingInfoInDatabase, getCandidateMeetingsFromDatabase, getInterviewerMeetingsFromDatabase, saveTestInDatabase, getQuizNamesFromDatabase, getInterviewerTestsFromDatabase, getSpecificTestFromDataBase, getCandidateTestsFromDatabase, getSpecificMeetingById, submitTestInDatabase, deleteSpecificMeetingById, deleteSpecificTestById } = require(`../services/meeting.services`)
 
 const { findUser, findCandidate } = require(`../services/user.services`);
 
@@ -14,6 +15,20 @@ const { meetingAlertEmail } = require(`../services/mail`)
 const createTest = async(req, res) => {
 
   try{
+
+    var { data } =  await axios.get(`https://opentdb.com/api.php?amount=${req.body.amount}&category=${req.body.topic}&type=multiple&difficulty=easy`)
+
+    req.body.questions = await data.results.map(question => {
+
+      let options = [...question.incorrect_answers, question.correct_answer ].sort()
+      return {
+        statement: question.question,
+        options,
+        correct: question.correct_answer
+      }
+    })
+
+
     // saving the meeting in the database
     var {status, data, error} = await saveTestInDatabase(req.body, req.user);
 
@@ -52,6 +67,95 @@ const createTest = async(req, res) => {
   }
 
 }
+
+const submitTest = async(req, res) => {
+
+  try{
+
+    const [{ testId }, {submition}] = [req.params, req.body];
+    // saving the meeting in the database
+    var {status, data, error} = await submitTestInDatabase(submition, testId);
+
+    if(error) {
+
+      logError("ERROR @ submitTest ",error)
+
+      return res.status(status).json({
+
+        message: error
+
+      })
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Test Submitted Successfully",
+      data: {}
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ submitTest`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error
+
+    })
+
+  }
+
+}
+
+const getSpecificTest = async(req, res) => {
+
+  try{
+
+    const { testId } = req.params
+    // saving the meeting in the database
+    var {status, data, error} = await getSpecificTestFromDataBase(testId);
+
+    if(error) {
+
+      logError("ERROR @ getSpecificTest ",error)
+
+      return res.status(status).json({
+
+        message: error
+
+      })
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Test Fetched Successfully",
+      data: data
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ getSpecificTest`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error
+
+    })
+
+  }
+
+}
+
 
 const getQuizNames = async(req, res) => {
 
@@ -137,7 +241,6 @@ const getInterviewerTests = async(req, res) => {
 
 }
 
-
 const addMeeting = async (req, res) => {
 
   try{
@@ -216,6 +319,187 @@ const addMeeting = async (req, res) => {
         error
       
       }
+
+    })
+
+  }
+
+}
+
+const deleteMeetingById = async(req, res) => {
+
+  try{
+
+    let { meetingId } = req.params
+
+    const  {status, data, error} = await deleteSpecificMeetingById(meetingId, req.user);
+
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Meeting Deleted Successfully",
+      data
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ deleteMeetingById`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: error
+
+    })
+
+  }
+
+}
+
+const deleteTestById = async(req, res) => {
+
+  try{
+
+    let { testId } = req.params
+
+    const  {status, data, error} = await deleteSpecificTestById(testId, req.user);
+
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Meeting Deleted Successfully",
+      data
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ deleteMeetingById`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: error
+
+    })
+
+  }
+
+}
+
+const getSpecificInterviewerMeeting = async(req, res) => {
+
+  try{
+
+    let query = {
+      _id : req.params.meetingId
+    }
+
+    const  {status, data, error} = await getSpecificMeetingById(query);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Meeting Fetched Successfully",
+      data
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ getSpecificInterviewerMeeting`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: error
+
+    })
+
+  }
+
+}
+
+const getSpecificCandidateMeeting = async(req, res) => {
+
+  try{
+
+    let query = {
+      _id : req.params.meetingId,
+      candidateUserEmail: req.user.email
+    }
+
+    const  {status, data, error} = await getSpecificMeetingById(query);
+
+    // checking the result of the operation
+    if (status === SERVER_ERROR) {
+      // this code runs in case data service failed due to
+      // unknown database error
+
+      // logging error message to the console
+      logError(`Requested operation failed. Unknown database error.`);
+
+      // returning the response with an error message
+      return res.status(SERVER_ERROR).json({
+
+        hasError: true,
+        message: `ERROR: Requested operation failed.`,
+        error: {
+
+          error
+
+        }
+
+      });
+
+    }
+
+    return res.status(SUCCESS).json({
+
+      hasError: false,
+      message: "Meeting Fetched Successfully",
+      data
+
+    })
+
+  } catch(error){
+
+    logError(`ERROR @ getSpecificCandidateMeeting`, error)
+
+    return res.status(SERVER_ERROR).json({
+
+      hasError: true,
+      message: "internal server error occured",
+      error: error
 
     })
 
@@ -484,11 +768,17 @@ module.exports = {
   getQuizNames,
   getInterviewerTests,
   getTestsForCandidates,
+  submitTest,
+  getSpecificTest,
+  deleteTestById,
 
 
   addMeeting,
   updateMeetingById,
   getMeetingsForCandidate,
-  getMeetingsForInterviewer
+  getMeetingsForInterviewer,
+  getSpecificCandidateMeeting,
+  getSpecificInterviewerMeeting,
+  deleteMeetingById
 
 }

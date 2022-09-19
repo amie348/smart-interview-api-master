@@ -67,8 +67,8 @@ const candidateSchema = Joi.object({
   phoneNumber: Joi.string().required(),//.custom(validatePhoneNo, `Validating Phone Number`),
   address: Joi.string().required(),
   skills: Joi.array().items(Joi.string()).required(),
-  education: Joi.array().items(educationSchema),
-  workExperience: Joi.array().items(workExperienceSchema),
+  education: educationSchema,
+  workExperience: workExperienceSchema,
   desiredJobTitles: Joi.array().items(Joi.string().required()),
   remoteWork: Joi.bool()
 
@@ -77,10 +77,11 @@ const candidateSchema = Joi.object({
 const updateCandidateSchema = Joi.object({
 
   age: Joi.number(),
+  city: Joi.string().required(),
   address: Joi.string(),
   skills: Joi.array().items(Joi.string()),
-  education: Joi.array().items(educationSchema),
-  workExperience: Joi.array().items(workExperienceSchema),
+  education: educationSchema,
+  workExperience: workExperienceSchema,
   desiredJobTitles: Joi.array().items(Joi.string().required()),
   phoneNumber: Joi.string(),//.custom(validatePhoneNo, `Validating Phone Number`),
   remoteWork: Joi.bool()

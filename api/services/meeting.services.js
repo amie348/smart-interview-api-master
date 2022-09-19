@@ -50,6 +50,165 @@ const saveTestInDatabase = async (testData, user) => {
 
 }
 
+const submitTestInDatabase = async (data, testId) => {
+
+  try {
+  
+    const {questions} = await testModel.findOne({_id: testId}, {questions: 1});
+    // console.log(questions)
+    // console.log("-------------------------data")
+    // console.log(data)
+
+    var score = 0;
+
+    let copyData = await questions.map(question => {
+      let copyQuestion = {}
+      
+      data.map(element => {
+
+        if(question._id == element._id){
+          if(question.correct == element.answer) {
+            score++;
+          }
+          copyQuestion = {statement: question.statement, options: question.options, correct:question.correct, _id: question._id, submitted: element.answer}
+        }
+
+      });
+
+
+      return copyQuestion;
+
+    })
+
+    const result = await testModel.findOneAndUpdate({_id: testId}, {"$set": {questions : copyData, score : score, attempted: true}}, {new: true})
+
+    console.log(result)
+
+    // returning saved response to it's caller 
+    return{
+
+        status: SUCCESS,
+        data: {}
+      
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // logging error messages to the console
+    logError(`ERROR @ submitTestInDatabase `, error);
+
+    // setting value of status and description
+    const [status, err] = [SERVER_ERROR, `tests fetching failed.`];
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status,
+      error: err
+
+    };
+
+  }
+
+}
+
+const updateTestInfoInDatabase =  async (testId, testData) => {
+
+  try {
+        
+      // saving franchise in the database
+      const result = await testModel.findOneAndUpdate({_id: testId, attempted: false}, testData, {new: true});
+      
+      if(!result){
+      
+          // returning saved response to it's caller 
+          return{
+      
+            status: NOT_FOUND,
+            error: "meeting Not found"
+        
+        };
+
+      }  
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: SUCCESS,
+          data: result
+      
+      };
+  
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // setting value of status and description
+    const [status, err] = [SERVER_ERROR,`Updating Meeting Information failed.`];
+      
+    logError(`ERROR @ updateTestInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
+
+const deleteTestInfoInDatabase =  async (testId, testData) => {
+
+  try {
+        
+      // saving franchise in the database
+      const result = await testModel.deleteOne({_id: testId, attempted: false});
+      
+      if(!result){
+      
+          // returning saved response to it's caller 
+          return{
+      
+            status: NOT_FOUND,
+            error: "meeting Not found"
+        
+        };
+
+      }  
+  
+      // returning saved response to it's caller 
+      return{
+  
+          status: SUCCESS,
+          data: {}
+      
+      };
+  
+    } catch (error) {
+      // this code runs in case of an error @ runtime
+  
+      // setting value of status and description
+    const [status, err] = [SERVER_ERROR,`Updating Meeting Information failed.`];
+      
+    logError(`ERROR @ deleteTestInfoInDatabase `, err);
+  
+
+      // returning response to indicate failure to its caller
+      return {
+  
+        status,
+        error: err
+  
+      };
+  
+    }
+
+}
+
 const getQuizNamesFromDatabase = async (user) => {
 
   try {
@@ -311,6 +470,124 @@ const saveMeetingInDatabase = async (meetingData, user) => {
 
 }
 
+const deleteSpecificMeetingById = async (meetingId, user) => {
+
+  try {
+  
+    // meetingData.madeBy = user._interviewerId
+
+    // console.log(meetingId, user._interviewerId)
+
+    const result = await MeetingModel.deleteOne({_id: meetingId, madeBy: user._interviewerId})
+
+    // returning saved response to it's caller 
+    return{
+
+        status: CREATED,
+        data: {}
+      
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // logging error messages to the console
+    logError(`ERROR @ deleteSpecificMeetingById `, error);
+
+    // setting value of status and description
+    const [status, err] = [SERVER_ERROR, `meeting creation failed.`];
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status,
+      error: err
+
+    };
+
+  }
+
+}
+
+const deleteSpecificTestById = async (testId) => {
+
+  try {
+  
+    const result = await testModel.deleteOne({_id: testId})
+
+    // returning saved response to it's caller 
+    return{
+
+        status: CREATED,
+        data: {}
+      
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // logging error messages to the console
+    logError(`ERROR @ deleteSpecificTestById `, error);
+
+    // setting value of status and description
+    const [status, err] = [SERVER_ERROR, `meeting creation failed.`];
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status,
+      error: err
+
+    };
+
+  }
+
+}
+
+const getSpecificMeetingById = async (query) => {
+
+  try {
+
+    const meeting = await MeetingModel.findOne(query).populate('test', 'title pin time questions attempted')
+
+    if(!meeting){
+
+      return {
+
+        status: NOT_FOUND,
+        error: `Meeting Not Found`
+
+      }
+
+    }
+
+
+    // returning saved system permissions to its caller
+    return {
+
+      status: SUCCESS,
+      data: meeting
+
+    };
+
+  } catch (error) {
+    // this code runs in case of an error @ runtime
+
+    // loggine error messages to the console
+    logError(`ERROR @ getSpecificMeetingById -> user.services.js`, error);
+
+    // returning response to indicate failure to its caller
+    return {
+
+      status: SERVER_ERROR,
+      error: `Unhandled exception occured on the server.`
+
+    };
+
+  }
+
+}
+
 const updateMeetingInfoInDatabase =  async (meetingData, _meetingId) => {
 
   try {
@@ -319,7 +596,7 @@ const updateMeetingInfoInDatabase =  async (meetingData, _meetingId) => {
       logInfo(`Info .. Updating Meeting Information `)
       
       // saving franchise in the database
-      const result = await candidateModel.findOneAndUpdate({_id: _meetingId}, meetingData, {new: true});
+      const result = await MeetingModel.findOneAndUpdate({_id: _meetingId}, meetingData, {new: true});
       
       if(!result){
       
@@ -569,16 +846,23 @@ const getInterviewerMeetingsFromDatabase = async (query, user) => {
 
 module.exports = {
 
-
   saveTestInDatabase,
   getQuizNamesFromDatabase,
   getSpecificTestFromDataBase,
   getInterviewerTestsFromDatabase,
   getCandidateTestsFromDatabase,
+  submitTestInDatabase,
+  submitTestInDatabase,
+  updateTestInfoInDatabase,
+  deleteTestInfoInDatabase,
+  deleteSpecificTestById,
+
 
   saveMeetingInDatabase,
+  getSpecificMeetingById,
   updateMeetingInfoInDatabase,
   getCandidateMeetingsFromDatabase,
-  getInterviewerMeetingsFromDatabase
+  getInterviewerMeetingsFromDatabase,
+  deleteSpecificMeetingById
 
 }

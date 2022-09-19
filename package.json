@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/amie348/smart-interview-api-master#readme",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",

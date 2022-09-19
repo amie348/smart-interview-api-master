@@ -15,6 +15,13 @@ const newTestSchema = Joi.object({
 
 });
 
+const submitTestSchema = Joi.object({
+  submition: Joi.array().items(Joi.object({
+    _id: Joi.string().required(),
+    answer: Joi.string().required()
+  }))
+})
+
 const updateTestSchema = Joi.object({
 
   title: Joi.string(),
@@ -40,11 +47,12 @@ const newMeetingSchema = Joi.object({
 
 const updateMeetingSchema = Joi.object({
   
-  candidateUserEmail: Joi.string().email().required(),
+  candidateUserEmail: Joi.string().email(),
   test: Joi.string().allow(null, ""),
   status : Joi.string(),
   startedAt: Joi.date(),
-  endedAt: Joi.date()
+  endedAt: Joi.date(),
+  connection : Joi.string().allow(null)
 
 });
 
@@ -67,6 +75,7 @@ module.exports = {
 
   newTestSchema,
   updateTestSchema,
+  submitTestSchema,
 
   newMeetingSchema,
   updateMeetingSchema,

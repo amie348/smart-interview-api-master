@@ -14,34 +14,39 @@ const {
   interviewerSchema, 
   updateInterviewerSchema,
   interviewerIdSchema,
-  companySchema
+  companySchema,
+  updateCompnaySchema
 } = require(`../validators/user.schemas`);
 
 const { ALLOWED_VALIDATION_SCHEMA_SCOPES: { BODY,PARAMS , QUERY, NONE }} = require(`../config`)
 
 // importing required controllers
-const { register, activate, login, addCandidateInfo, updateCandidateInfoById, addInterviewerInfo, updateInterviewerInfoById, addCompanyInfo, updateCompanyInfoById, updateCompnaySchema } = require(`../controllers/user.controllers`);
+const { register, activate, login, addCandidateInfo, updateCandidateInfoById, addInterviewerInfo, updateInterviewerInfoById, addCompanyInfo, updateCompanyInfoById, getInterviewerInfo, getCandidateInfo } = require(`../controllers/user.controllers`);
 
 
 const { decodeActivationToken, authenticateUser, authorizeInterviewer } = require(`../middlewares/authentication.middleware`);
+
+
 
 
 userRouter.post(`/register`, validateInput(registerUserSchema, BODY), register);
 userRouter.post(`/activate/:activationToken`, validateInput(activateUserSchema, PARAMS), decodeActivationToken, activate);
 userRouter.post(`/login`, validateInput(loginSchema, BODY),  login);
 
-
-
 userRouter.post(`/candidate`, authenticateUser, validateInput(candidateSchema, BODY), addCandidateInfo);
-userRouter.patch(`/candidate/:_candidateId`, authenticateUser, validateInput(specificCandidateIdSchema, PARAMS), validateInput(updateCandidateSchema, BODY), updateCandidateInfoById);
+userRouter.patch(`/candidate/:_candidateId`, authenticateUser, validateInput(specificCandidateIdSchema, PARAMS),  updateCandidateInfoById);
 
 
 userRouter.post(`/interviewer`, authenticateUser , validateInput(interviewerSchema, BODY), addInterviewerInfo)
-userRouter.patch(`/interviewer/:_interviewerId`, authenticateUser, validateInput(interviewerIdSchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateInterviewerInfoById);
+userRouter.patch(`/interviewer/:_interviewerId`, authenticateUser, validateInput(interviewerIdSchema, PARAMS),  updateInterviewerInfoById);
 
 
-userRouter.post(`/company`, authenticateUser, authorizeInterviewer, validateInput(companySchema, BODY), addCompanyInfo)
-userRouter.patch(`/company/:_Id`, authenticateUser, authorizeInterviewer, validateInput(updateCompnaySchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateCompanyInfoById);
+userRouter.get('/info/interviewer',authenticateUser, getInterviewerInfo)
+userRouter.get('/info/candidate',authenticateUser, getCandidateInfo)
+
+
+// userRouter.post(`/company`, authenticateUser, authorizeInterviewer, validateInput(companySchema, BODY), addCompanyInfo)
+// userRouter.patch(`/company/:_Id`, authenticateUser, authorizeInterviewer, validateInput(updateCompnaySchema, PARAMS), validateInput(updateInterviewerSchema, BODY), updateCompanyInfoById);
 
 
 

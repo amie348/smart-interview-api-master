@@ -20,7 +20,7 @@ module.exports = {
 
   BASE_API_URL : APP_MODE === 'DEV' ? 'http://localhost:4000' : 'http://localhost:4000',
 
-  CLIENT_BASE_URL: APP_MODE === `DEV` ? `http://localhost:4000` : `http://localhost:4000`, 
+  CLIENT_BASE_URL: APP_MODE === `DEV` ? `http://localhost:3000` : `http://localhost:3000`, 
 
   MONGODB_ATLAS_CONNECTION_URI : `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@smart-interview.k0rap.mongodb.net/smart-interview`,
 

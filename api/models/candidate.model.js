@@ -10,11 +10,15 @@ const candiateSchema = new mongoose.Schema({
   _userId: {
       type: mongoose.Types.ObjectId,
       ref: `user`,
-      unique:   true
+      unique: true
   },
   age:{
     type: Number,
     required: true
+  },
+  city: {
+    type: String,
+    default: ""
   },
   // address: addressSchema,
   address : {
@@ -25,7 +29,7 @@ const candiateSchema = new mongoose.Schema({
     type: [String],
     trim: true,
   },
-  education: [{
+  education: {
     _id: false,
 
     qualification: {
@@ -40,8 +44,8 @@ const candiateSchema = new mongoose.Schema({
         type: String,
         default: ``
     }
-  }],
-  workExperience:[{
+  },
+  workExperience:{
 
     _id: false,
 
@@ -59,7 +63,7 @@ const candiateSchema = new mongoose.Schema({
       type: String,
     },
 
-  }],
+  },
   desiredJobTitles:{
     type: [String],
     trim: true,
