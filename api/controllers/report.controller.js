@@ -3,6 +3,7 @@ const userModel = require("../models/user.model");
 const Interviewer = require(`../models/interviewer.model`)
 const Candidate = require(`../models/candidate.model`)
 const MeetingModal= require(`../models/meeting.model`)
+const { jobHiredEmail } = require(`../services/mail`)
 const mongoose = require(`mongoose`)
 
 
@@ -327,6 +328,11 @@ const updateReportById = async (req, res) => {
 
     const report  = await ReportModel.findOneAndUpdate({_id:  reportId}, req.body, {new: true})
 
+
+    const user = await userModel.findOne({username: report.candidateName});
+
+    jobHiredEmail(user.email, req.user, req.body.comment)
+
     if(!report) {
 
       return res.status(404).json({
@@ -337,6 +343,7 @@ const updateReportById = async (req, res) => {
       })
 
     }
+
 
 
     return res.status(200).json({
@@ -359,7 +366,6 @@ const updateReportById = async (req, res) => {
   }
 
 }
-
 
 const deleteReportById = async(req, res) => {
 

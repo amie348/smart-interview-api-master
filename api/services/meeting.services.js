@@ -803,7 +803,9 @@ const getInterviewerMeetingsFromDatabase = async (query, user) => {
     // querying database for user
     
     
-    const meetings = await MeetingModel.find(filters).populate(`test`, `titlle _id attempted`);
+    const meetings = await MeetingModel.find(filters)
+
+    //.populate(`test`, `titlle _id attempted`);
 
     if(!meetings){
 

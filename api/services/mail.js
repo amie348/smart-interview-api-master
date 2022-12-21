@@ -106,9 +106,56 @@ const meetingAlertEmail = async (to, user, meeting, test) => {
   })
 }
 
+const jobHiredEmail = async (to, interviewer, comment) => {
+  oauth2Client.setCredentials({
+      refresh_token :  GOOGLE_APP_REFRESH_TOKEN
+  })
+  const accessToken = oauth2Client.getAccessToken();
+  const smtpTransport = await nodemailer.createTransport({
+
+      service: "gmail",
+      auth: {
+          type : "OAuth2",
+          user : SENDER_EMAIL_ADDRESS,
+          clientId:  GOOGLE_APP_CLIENT_ID,
+          clientSecret:  GOOGLE_APP_CLIENT_SECRET,
+          refreshToken :  GOOGLE_APP_REFRESH_TOKEN,
+          accessToken
+      }
+  })
+
+  const mailOptions = {
+  from: SENDER_EMAIL_ADDRESS,
+  to : to,
+  subject: "Good News",
+  html: `
+    <div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
+    <h2 style="text-align: center; text-transform: uppercase;color: teal;">Smart Interview!</h2>
+ 
+    <p>Congratulations !!!!! You are Hired by ${interviewer.username}, </p>
+    <br>
+    <br>
+    <p>"${comment}"   These were comments of ${interviewer.username} given to you </p>
+    <br>
+    <br>
+    <p>"For further discussion you can contact  ${interviewer.username} on ${interviewer.email}</p>
+    
+
+    
+    </div>
+  `
+  }
+
+  smtpTransport.sendMail(mailOptions, (err, infor) => {
+    if(err) return err;
+    return infor
+  })
+}
+
 
 
 module.exports = {
   sendActivationEmail,
-  meetingAlertEmail
+  meetingAlertEmail,
+  jobHiredEmail
 }
